@@ -66,4 +66,4 @@ First boot after a full wipe sits on the Nokia logo for several minutes — that
 
 ---
 
-**Next:** Set up [Developer Mode](/guides/enable-developer-mode), or see the [troubleshooting guide](/guides/flasher-troubleshooting) if something goes wrong.
+**Next:** Set up [Developer Mode](/guides/developer-mode), or see the [troubleshooting guide](/guides/flasher-troubleshooting) if something goes wrong.
