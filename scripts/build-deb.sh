@@ -3,17 +3,17 @@
 # Astro will then include it in the static asset bundle that wrangler ships.
 set -euo pipefail
 
-PKG_NAME="n9-mirror-setup"
+PKG_NAME="setup"
 PKG_VERSION="1.0-1"
 BUILD_DIR="$(mktemp -d)"
-PKG_DIR="${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}"
+PKG_DIR="${BUILD_DIR}/${PKG_NAME}"
 OUT_DIR="public"
 
 mkdir -p "$PKG_DIR/DEBIAN"
 mkdir -p "$PKG_DIR/etc/apt/sources.list.d"
 
 # The actual sources.list dropped into /etc/apt/sources.list.d/
-cat > "$PKG_DIR/etc/apt/sources.list.d/n9-mirror.list" <<'EOF'
+cat >"$PKG_DIR/etc/apt/sources.list.d/n9-mirror.list" <<'EOF'
 # N9 Mirror — Harmattan packages
 # https://n9.mpw.sh
 
@@ -30,7 +30,7 @@ deb-src https://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
 deb https://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries
 EOF
 
-cat > "$PKG_DIR/DEBIAN/control" <<EOF
+cat >"$PKG_DIR/DEBIAN/control" <<EOF
 Package: $PKG_NAME
 Version: $PKG_VERSION
 Section: utils
@@ -41,6 +41,21 @@ Description: Adds the n9.mpw.sh apt repository
  Configures /etc/apt/sources.list.d/n9-mirror.list to enable the
  community mirror of MeeGo Harmattan packages and tools.
 EOF
+
+cat >"$PKG_DIR/DEBIAN/postinst" <<'EOF'
+#!/bin/sh
+set -e
+
+# Blank out the dead Nokia offline SSU keyring repos to silence
+# apt-get update errors. The files must exist (not be deleted) so
+# aegis-ssu doesn't try to recreate them.
+for f in /etc/apt/sources.list.d/aegis.ssu-keyring-*.list; do
+    [ -e "$f" ] && : > "$f"
+done
+
+exit 0
+EOF
+chmod 0755 "$PKG_DIR/DEBIAN/postinst"
 
 dpkg-deb --build --root-owner-group "$PKG_DIR" >/dev/null
 
