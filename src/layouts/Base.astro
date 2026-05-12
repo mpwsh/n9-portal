@@ -1,0 +1,101 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Which nav item is active for highlighting */
+  active?: "home" | "setup" | "browse" | "guides";
+}
+
+const { title, description = "Mirror of the MeeGo Harmattan repositories for the Nokia N9.", active } = Astro.props;
+
+const navItems = [
+  { key: "setup", label: "Setup", href: "/setup" },
+  { key: "browse", label: "Browse", href: "/browse" },
+  { key: "guides", label: "Guides", href: "/guides/" },
+] as const;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📱%3C/text%3E%3C/svg%3E" />
+    <script
+      is:inline
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.x/dist/cdn.min.js"></script>
+  </head>
+  <body class="text-n9-100">
+    <header
+      x-data="{ open: false }"
+      class="sticky top-0 z-10 border-b border-n9-800 bg-n9-950/80 backdrop-blur"
+    >
+      <div class="mx-auto flex h-14 max-w-screen-xl items-center justify-between gap-3 px-6 md:px-10 lg:px-16">
+        <a href="/" class="inline-flex items-center gap-2">
+          <span class="text-2xl">📱</span>
+          <span class="font-semibold text-n9-50">N9 Mirror</span>
+        </a>
+
+        <button
+          class="flex size-8 items-center justify-center rounded-md bg-n9-800 text-n9-100 md:hidden"
+          @click="open = !open"
+          aria-label="Toggle navigation"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4">
+            <path x-show="!open" d="M4 6h16M4 12h16M4 18h16"></path>
+            <path x-show="open" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <nav class="hidden items-center gap-4 md:flex">
+          {navItems.map((item) => (
+            <a
+              href={item.href}
+              class:list={[
+                "text-sm font-medium transition-colors",
+                active === item.key
+                  ? "text-n9-50"
+                  : "text-n9-300 hover:text-white",
+              ]}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <nav x-cloak x-show="open" class="grid gap-2 pb-3 md:hidden px-6">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class="flex h-8 items-center rounded-md bg-n9-800 px-3.5 text-xs font-medium text-n9-100"
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-8 md:px-10 lg:px-16">
+      <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
+        <p class="text-sm text-n9-400">
+          Mirrored with ❤️ for the N9 community
+        </p>
+        <p class="text-sm text-n9-400">
+          <a href="/setup" class="hover:text-n9-200">Add this mirror</a>
+          <span class="mx-2 text-n9-700">·</span>
+          <a href="/browse" class="hover:text-n9-200">Browse</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

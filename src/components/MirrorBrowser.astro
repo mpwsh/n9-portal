@@ -1,0 +1,243 @@
+---
+interface Props {
+  /** Initial root prefix in the bucket */
+  rootPrefix: string;
+  /** Optional secondary tab (e.g. "n9mirror/") */
+  altPrefix?: string;
+  /** Tab labels */
+  rootLabel?: string;
+  altLabel?: string;
+}
+
+const {
+  rootPrefix,
+  altPrefix,
+  rootLabel = "Packages",
+  altLabel = "Files",
+} = Astro.props;
+---
+
+<div
+  x-data={`mirrorBrowser(${JSON.stringify({ rootPrefix, altPrefix, rootLabel, altLabel })})`}
+  x-init="init()"
+>
+  {altPrefix && (
+    <div class="mb-6 flex gap-2 border-b border-n9-800">
+      <button
+        @click="setTab('root')"
+        :class="tab === 'root' ? 'border-n9-100 text-white' : 'border-transparent text-n9-400 hover:text-n9-200'"
+        class="-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+      >
+        {rootLabel}
+      </button>
+      <button
+        @click="setTab('alt')"
+        :class="tab === 'alt' ? 'border-n9-100 text-white' : 'border-transparent text-n9-400 hover:text-n9-200'"
+        class="-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+      >
+        {altLabel}
+      </button>
+    </div>
+  )}
+
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+    <nav class="flex flex-wrap items-center gap-1 text-sm">
+      <template x-for="(crumb, i) in breadcrumbs" :key="i">
+        <span class="flex items-center gap-1">
+          <button
+            @click="navigate(crumb.path)"
+            class="rounded px-2 py-1 font-medium text-n9-300 hover:bg-n9-800"
+            x-text="crumb.label"
+          ></button>
+          <span x-show="i < breadcrumbs.length - 1" class="text-n9-700">/</span>
+        </span>
+      </template>
+    </nav>
+    <input
+      type="search"
+      x-model="filter"
+      placeholder="Filter…"
+      class="w-full rounded-md border border-n9-700 bg-n9-800 px-3 py-1.5 text-sm text-n9-100 placeholder-n9-500 focus:border-n9-500 focus:outline-none sm:w-48"
+    />
+  </div>
+
+  <div class="overflow-hidden rounded-lg border border-n9-700 bg-n9-800">
+    <div x-show="loading" class="px-6 py-12 text-center text-sm text-n9-400">
+      Loading…
+    </div>
+    <div
+      x-show="error"
+      x-cloak
+      class="px-6 py-12 text-center text-sm text-red-400"
+    >
+      <span x-text="error"></span>
+    </div>
+    <div
+      x-show="!loading && !error && filtered.folders.length === 0 && filtered.files.length === 0"
+      x-cloak
+      class="px-6 py-12 text-center text-sm text-n9-400"
+    >
+      Nothing here.
+    </div>
+
+    <button
+      x-show="!loading && currentPath !== rootPathForTab()"
+      x-cloak
+      @click="navigateUp()"
+      class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm hover:bg-n9-700/30"
+    >
+      <span class="text-n9-500">↑</span>
+      <span class="text-n9-300">..</span>
+    </button>
+
+    <template x-for="folder in filtered.folders" :key="folder.path">
+      <button
+        @click="navigate(folder.path)"
+        class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm last:border-b-0 hover:bg-n9-700/30"
+      >
+        <span>📁</span>
+        <span class="font-medium text-n9-100" x-text="folder.name"></span>
+      </button>
+    </template>
+
+    <template x-for="file in filtered.files" :key="file.key">
+      <a
+        :href="'/' + file.key"
+        class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm last:border-b-0 hover:bg-n9-700/30"
+      >
+        <span x-text="fileIcon(file.name)"></span>
+        <span class="flex-1 truncate text-n9-100" x-text="file.name"></span>
+        <span
+          class="shrink-0 text-xs tabular-nums text-n9-400"
+          x-text="formatSize(file.size)"
+        ></span>
+      </a>
+    </template>
+  </div>
+
+  <div class="mt-3 text-xs text-n9-400">
+    <span x-text="filtered.folders.length"></span> folders,
+    <span x-text="filtered.files.length"></span> files
+    <span
+      x-show="truncated"
+      x-cloak
+      class="ml-2 text-amber-400"
+    >(listing truncated — narrow the path)</span>
+  </div>
+</div>
+
+<script is:inline>
+  // Inlined so we don't need a bundler setup; Alpine reads it from window.
+  window.mirrorBrowser = function (config) {
+    return {
+      tab: "root",
+      rootPrefix: config.rootPrefix,
+      altPrefix: config.altPrefix || null,
+      currentPath: config.rootPrefix,
+      filter: "",
+      loading: false,
+      error: null,
+      folders: [],
+      files: [],
+      truncated: false,
+
+      rootPathForTab() {
+        return this.tab === "root" ? this.rootPrefix : this.altPrefix;
+      },
+
+      init() {
+        this.currentPath = this.rootPathForTab();
+        this.load();
+      },
+
+      setTab(t) {
+        if (this.tab === t) return;
+        this.tab = t;
+        this.currentPath = this.rootPathForTab();
+        this.filter = "";
+        this.load();
+      },
+
+      async load() {
+        this.loading = true;
+        this.error = null;
+        try {
+          const res = await fetch(
+            "/api/list?prefix=" + encodeURIComponent(this.currentPath)
+          );
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          this.folders = data.folders || [];
+          this.files = data.files || [];
+          this.truncated = !!data.truncated;
+        } catch (e) {
+          this.error = "Failed to load: " + e.message;
+          this.folders = [];
+          this.files = [];
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      navigate(path) {
+        this.currentPath = path;
+        this.filter = "";
+        this.load();
+      },
+
+      navigateUp() {
+        const trimmed = this.currentPath.replace(/\/$/, "");
+        const idx = trimmed.lastIndexOf("/");
+        this.currentPath = idx >= 0 ? trimmed.slice(0, idx + 1) : "";
+        this.load();
+      },
+
+      get breadcrumbs() {
+        const parts = this.currentPath
+          .replace(/\/$/, "")
+          .split("/")
+          .filter(Boolean);
+        const crumbs = [{ label: "root", path: "" }];
+        let acc = "";
+        for (const part of parts) {
+          acc += part + "/";
+          crumbs.push({ label: part, path: acc });
+        }
+        return crumbs;
+      },
+
+      get filtered() {
+        const q = this.filter.trim().toLowerCase();
+        if (!q) return { folders: this.folders, files: this.files };
+        return {
+          folders: this.folders.filter((f) =>
+            f.name.toLowerCase().includes(q)
+          ),
+          files: this.files.filter((f) =>
+            f.name.toLowerCase().includes(q)
+          ),
+        };
+      },
+
+      fileIcon(name) {
+        if (name.endsWith(".deb")) return "📦";
+        if (name.endsWith(".gz") || name.endsWith(".xz") || name.endsWith(".bz2")) return "🗜️";
+        if (/Release|Packages|InRelease/.test(name)) return "📄";
+        if (name.endsWith(".dsc")) return "📝";
+        return "📄";
+      },
+
+      formatSize(bytes) {
+        if (bytes === 0 || bytes == null) return "";
+        const units = ["B", "KB", "MB", "GB"];
+        let i = 0;
+        let n = bytes;
+        while (n >= 1024 && i < units.length - 1) {
+          n /= 1024;
+          i++;
+        }
+        return n.toFixed(n < 10 && i > 0 ? 1 : 0) + " " + units[i];
+      },
+    };
+  };
+</script>

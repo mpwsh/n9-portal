@@ -1,0 +1,46 @@
+---
+import Base from "../../layouts/Base.astro";
+
+// import.meta.glob returns a record of path -> module-loader; eager: true
+// makes it return the modules directly so we can read frontmatter sync.
+const modules = import.meta.glob<{
+  frontmatter: { title: string; description?: string };
+  url: string;
+}>("./*.md", { eager: true });
+
+const sorted = Object.values(modules)
+  .map((g) => ({
+    title: g.frontmatter.title ?? "Untitled",
+    description: g.frontmatter.description ?? "",
+    url: g.url,
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<Base title="Guides — N9 Mirror" active="guides">
+  <section class="mx-auto max-w-screen-xl px-6 py-12 md:px-10 lg:px-16">
+    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+      Guides
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-n9-300">
+      Step-by-step tutorials for getting the most out of your N9.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {sorted.map((g) => (
+        <a
+          href={g.url}
+          class="group block rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
+        >
+          <h2 class="mb-2 text-lg font-semibold text-white">{g.title}</h2>
+          <p class="mb-4 text-sm text-n9-300">{g.description}</p>
+          <p class="text-sm font-medium text-n9-200 group-hover:text-white">
+            Read →
+          </p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,25 @@
+---
+import Base from "../layouts/Base.astro";
+import MirrorBrowser from "../components/MirrorBrowser.astro";
+---
+
+<Base title="Browse — N9 Mirror" active="browse">
+  <section class="mx-auto max-w-screen-xl px-6 py-12 md:px-10 lg:px-16">
+    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+      Browse the mirror
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-n9-300">
+      Live listing of everything in the bucket. Click into folders, filter by
+      name, click a file to download it.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16">
+    <MirrorBrowser
+      rootPrefix="harmattan-dev.nokia.com/"
+      altPrefix="n9mirror/"
+      rootLabel="Packages"
+      altLabel="Raw files"
+    />
+  </section>
+</Base>

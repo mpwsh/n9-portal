@@ -1,0 +1,19 @@
+name = "n9-mirror"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Static assets from Astro's build output.
+# Workers tries assets first; anything not found falls through to worker.js.
+[assets]
+binding = "ASSETS"
+directory = "./dist"
+not_found_handling = "404-page"
+
+# R2 binding for the mirror data.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "meego"
+
+[[routes]]
+pattern = "n9.mpw.sh"
+custom_domain = true

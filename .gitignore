@@ -1,0 +1,27 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+.bun-tag/
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Generated .deb (rebuilt on every deploy)
+public/n9-mirror-setup.deb
+
+# Editor / OS
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+bun-debug.log*
+*.log

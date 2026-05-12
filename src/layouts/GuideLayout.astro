@@ -1,0 +1,122 @@
+---
+import Base from "./Base.astro";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+---
+
+<Base
+  title={`${frontmatter.title} — N9 Mirror`}
+  description={frontmatter.description}
+  active="guides"
+>
+  <article class="mx-auto max-w-3xl px-6 py-12 md:px-10">
+    <a
+      href="/guides/"
+      class="mb-8 inline-block text-sm font-medium text-n9-400 hover:text-n9-200"
+    >
+      ← All guides
+    </a>
+
+    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+      {frontmatter.title}
+    </h1>
+    {frontmatter.description && (
+      <p class="mt-4 text-lg text-n9-300">{frontmatter.description}</p>
+    )}
+
+    <div class="prose-guide mt-12">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style is:global>
+  /* Hand-rolled prose styles, since we're avoiding the Tailwind typography
+     plugin (it would add another dep and we only need a few elements). */
+  .prose-guide {
+    color: var(--color-n9-200);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .prose-guide > * + * {
+    margin-top: 1.25em;
+  }
+  .prose-guide h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+  .prose-guide h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose-guide p {
+    color: var(--color-n9-300);
+  }
+  .prose-guide ul,
+  .prose-guide ol {
+    padding-left: 1.5em;
+    color: var(--color-n9-300);
+  }
+  .prose-guide ul { list-style: disc; }
+  .prose-guide ol { list-style: decimal; }
+  .prose-guide li { margin: 0.4em 0; }
+  .prose-guide strong { color: white; font-weight: 600; }
+  .prose-guide a {
+    color: var(--color-n9-100);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-n9-600);
+  }
+  .prose-guide a:hover {
+    text-decoration-color: var(--color-n9-300);
+  }
+  .prose-guide code {
+    background: var(--color-n9-800);
+    color: var(--color-n9-100);
+    padding: 0.15em 0.4em;
+    border-radius: 0.3em;
+    font-size: 0.9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .prose-guide pre {
+    background: var(--color-n9-950);
+    border: 1px solid var(--color-n9-800);
+    color: var(--color-n9-100);
+    padding: 1em;
+    border-radius: 0.5em;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.5;
+  }
+  .prose-guide pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: 1em;
+  }
+  .prose-guide blockquote {
+    border-left: 3px solid var(--color-n9-600);
+    padding: 0.5em 1em;
+    background: oklch(0.339 0.019 260.7 / 0.3);
+    border-radius: 0 0.3em 0.3em 0;
+    color: var(--color-n9-200);
+  }
+  .prose-guide hr {
+    border: 0;
+    border-top: 1px solid var(--color-n9-800);
+    margin: 2em 0;
+  }
+</style>

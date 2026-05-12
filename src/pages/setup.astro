@@ -1,0 +1,98 @@
+---
+import Base from "../layouts/Base.astro";
+
+const sourcesList = `# Flat repositories
+deb https://n9.mpw.sh/n9mirror/001 ./
+deb https://n9.mpw.sh/n9mirror/apps ./
+deb https://n9.mpw.sh/n9mirror/tools ./
+
+# Standard repository (Harmattan SDK)
+deb https://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
+deb-src https://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
+
+# Nokia binaries
+deb https://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries`;
+---
+
+<Base title="Setup — N9 Mirror" active="setup">
+  <section class="mx-auto max-w-screen-xl px-6 py-16 md:px-10 lg:px-16">
+    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+      Add the mirror to your N9
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-n9-300">
+      Two options — pick whichever you prefer. Both end with the same
+      <code class="rounded bg-n9-800 px-1.5 py-0.5 text-sm">apt-get update</code> step.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-12 md:px-10 lg:px-16">
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="rounded-lg border border-n9-700 bg-n9-800 p-6">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-n9-700 px-3 py-1 text-xs font-medium text-n9-100">
+          Recommended
+        </div>
+        <h2 class="mb-2 text-xl font-semibold text-white">Install via .deb</h2>
+        <p class="mb-4 text-sm text-n9-300">
+          One command. The package drops a sources.list file in the right place.
+        </p>
+        <pre class="mb-4 overflow-x-auto rounded-md bg-n9-950 p-4 text-xs text-n9-100"><code>{`wget https://n9.mpw.sh/n9-mirror-setup.deb
+dpkg -i n9-mirror-setup.deb
+apt-get update`}</code></pre>
+        <a
+          href="/n9-mirror-setup.deb"
+          class="inline-block text-sm font-medium text-n9-200 hover:text-white"
+        >
+          Direct download →
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-n9-700 bg-n9-800 p-6">
+        <h2 class="mb-2 text-xl font-semibold text-white">Manual config</h2>
+        <p class="mb-4 text-sm text-n9-300">
+          Create <code class="rounded bg-n9-950 px-1.5 py-0.5 text-xs">/etc/apt/sources.list.d/n9-mirror.list</code> with:
+        </p>
+        <pre class="mb-4 max-h-72 overflow-auto rounded-md bg-n9-950 p-4 text-xs text-n9-100"><code>{sourcesList}</code></pre>
+        <p class="text-sm text-n9-300">
+          Then <code class="rounded bg-n9-950 px-1.5 py-0.5 text-xs">apt-get update</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-12 md:px-10 lg:px-16">
+    <h2 class="mb-6 text-2xl font-semibold text-white">After setup</h2>
+    <div class="grid gap-6 sm:grid-cols-2">
+      <div class="rounded-lg border border-n9-700 bg-n9-800 p-5">
+        <h3 class="mb-2 font-semibold text-white">Search packages</h3>
+        <pre class="overflow-x-auto rounded-md bg-n9-950 p-3 text-xs text-n9-100"><code>apt-cache search &lt;name&gt;</code></pre>
+      </div>
+      <div class="rounded-lg border border-n9-700 bg-n9-800 p-5">
+        <h3 class="mb-2 font-semibold text-white">Install something</h3>
+        <pre class="overflow-x-auto rounded-md bg-n9-950 p-3 text-xs text-n9-100"><code>apt-get install &lt;package&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-12 md:px-10 lg:px-16">
+    <h2 class="mb-6 text-2xl font-semibold text-white">Troubleshooting</h2>
+    <dl class="space-y-6">
+      <div>
+        <dt class="mb-1 font-semibold text-white">apt-get update fails with a GPG error</dt>
+        <dd class="text-sm text-n9-300">
+          The original Nokia signing keys may not be present on a fresh install.
+          The mirror serves the original signed Release files unchanged, so this
+          is a key-trust issue, not a mirror issue. See the developer mode guide
+          for details.
+        </dd>
+      </div>
+      <div>
+        <dt class="mb-1 font-semibold text-white">404 on Packages.gz</dt>
+        <dd class="text-sm text-n9-300">
+          Check that your sources.list line matches exactly — the Harmattan SDK
+          components are <code class="rounded bg-n9-800 px-1.5 py-0.5 text-xs">harmattan/sdk free non-free</code>,
+          not <code class="rounded bg-n9-800 px-1.5 py-0.5 text-xs">harmattan sdk</code>.
+        </dd>
+      </div>
+    </dl>
+  </section>
+</Base>
