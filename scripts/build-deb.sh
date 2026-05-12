@@ -3,7 +3,8 @@
 # Astro will then include it in the static asset bundle that wrangler ships.
 set -euo pipefail
 
-PKG_NAME="setup"
+PKG_NAME="n9-mirror-setup"
+SHORT_PKG_NAME="n9-mirror-setup"
 PKG_VERSION="1.0-1"
 BUILD_DIR="$(mktemp -d)"
 PKG_DIR="${BUILD_DIR}/${PKG_NAME}"
@@ -35,8 +36,8 @@ Package: $PKG_NAME
 Version: $PKG_VERSION
 Section: utils
 Priority: optional
-Architecture: all
-Maintainer: N9 Mirror <admin@mpw.sh>
+Architecture: armel
+Maintainer: mpw <x@mpw.sh>
 Description: Adds the n9.mpw.sh apt repository
  Configures /etc/apt/sources.list.d/n9-mirror.list to enable the
  community mirror of MeeGo Harmattan packages and tools.
@@ -60,8 +61,8 @@ chmod 0755 "$PKG_DIR/DEBIAN/postinst"
 dpkg-deb --build --root-owner-group -Zgzip "$PKG_DIR" >/dev/null
 
 mkdir -p "$OUT_DIR"
-mv "${PKG_DIR}.deb" "${OUT_DIR}/${PKG_NAME}.deb"
+mv "${PKG_DIR}.deb" "${OUT_DIR}/${SHORT_PKG_NAME}.deb"
 rm -rf "$BUILD_DIR"
 
-echo "Built: ${OUT_DIR}/${PKG_NAME}.deb"
-ls -lh "${OUT_DIR}/${PKG_NAME}.deb"
+echo "Built: ${OUT_DIR}/${SHORT_PKG_NAME}.deb"
+ls -lh "${OUT_DIR}/${SHORT_PKG_NAME}.deb"
