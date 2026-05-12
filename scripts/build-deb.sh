@@ -6,6 +6,12 @@
 # it rejects the package as "invalid installation package."
 #
 # Force gzip compression because the N9's 2012-era dpkg predates zstd.
+#
+# Note: the signed `apt-repo` repository (which contains hack-installer
+# and similar privileged-capability packages) is intentionally NOT added
+# here. Adding it would require also auto-trusting a GPG signing key
+# silently in postinst, which we don't want. Users opt in via the
+# Aegis Installer guide.
 
 set -euo pipefail
 
@@ -43,6 +49,10 @@ deb http://n9.mpw.sh/n9mirror/tools ./
 
 # OpenRepos mirror
 deb http://n9.mpw.sh/openrepos ./
+
+# Signed community apt-repo (hack-installer etc.) — opt in via
+# the Aegis Installer guide to also trust the signing key.
+# deb http://n9.mpw.sh/apt-repo unstable main
 
 # Standard repository (Harmattan SDK)
 # deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
@@ -86,7 +96,6 @@ chmod 0755 "$PKG_DIR/DEBIAN/postinst"
 
 mkdir -p "$OUT_DIR"
 dpkg-deb --build --root-owner-group -Zgzip "$PKG_DIR" "${OUT_DIR}/${SHORT_PKG_NAME}.deb" >/dev/null
-
 rm -rf "$BUILD_DIR"
 
 echo "Built: ${OUT_DIR}/${SHORT_PKG_NAME}.deb"

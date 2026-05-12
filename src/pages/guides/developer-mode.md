@@ -53,6 +53,17 @@ devel-su
 # password is rootme
 ```
 
+## Step 7: Install wget
+
+As root, run:
+
+```bash
+apt-get update
+apt-get install wget -y
+```
+
+You can also install "Utilities" from Security -> Developer mode -> Press install on utilities
+
 ---
 
 **Next:** Browse the [mirror](/browse) to find packages, or check out the other [guides](/guides/).
