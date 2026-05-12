@@ -57,7 +57,7 @@ exit 0
 EOF
 chmod 0755 "$PKG_DIR/DEBIAN/postinst"
 
-dpkg-deb --build --root-owner-group "$PKG_DIR" >/dev/null
+dpkg-deb --build --root-owner-group -Zgzip "$PKG_DIR" >/dev/null
 
 mkdir -p "$OUT_DIR"
 mv "${PKG_DIR}.deb" "${OUT_DIR}/${PKG_NAME}.deb"
