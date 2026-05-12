@@ -5,7 +5,7 @@ interface Props {
   title: string;
   description?: string;
   /** Which nav item is active for highlighting */
-  active?: "home" | "setup" | "browse" | "guides";
+  active?: "home" | "setup" | "browse" | "guides" | "docs";
 }
 
 const { title, description = "Mirror of the MeeGo Harmattan repositories for the Nokia N9.", active } = Astro.props;
@@ -13,6 +13,7 @@ const { title, description = "Mirror of the MeeGo Harmattan repositories for the
 const navItems = [
   { key: "setup", label: "Setup", href: "/setup" },
   { key: "browse", label: "Browse", href: "/browse" },
+  { key: "docs", label: "Docs", href: "/docs/" },
   { key: "guides", label: "Guides", href: "/guides/" },
 ] as const;
 ---
