@@ -1,16 +1,36 @@
 ---
 layout: ../../layouts/GuideLayout.astro
 title: Enable Developer Mode
-description: Unlock root access and install developer tools on your Nokia N9.
+description: Install the N9 mirror and unlock root access on your Nokia N9.
 ---
 
-> ⚠️ **Warning:** Enabling developer mode gives you root access. Be careful with terminal commands — you can break your device.
+> ⚠️ **Warning:** Developer mode gives you root access. Be careful with terminal commands — you can break your device.
 
-## Step 1: Install the Developer Mode package
+> ℹ️ Nokia's original repositories are dead, so enabling Developer Mode on a stock N9 fails out of the box. You need to install the N9 mirror first, then toggle Developer Mode.
 
-On your Nokia N9, open the Nokia Store and search for "Developer Mode". Install the official Developer Mode package.
+## Step 1: Allow non-store installations
 
-## Step 2: Enable Developer Mode
+On your N9:
+
+1. Open **Settings**
+2. Go to **Applications → Installations**
+3. Enable **Allow installations from non-Store sources**
+
+## Step 2: Connect to the internet
+
+Wi-Fi or 3G, doesn't matter — just make sure you're online.
+
+## Step 3: Install the mirror package
+
+Open the browser on your N9 and go to:
+
+```
+http://n9.mpw.sh/setup.deb
+```
+
+Tap the file when it downloads, accept the prompts, and let it install. This adds the N9 mirror to your apt sources so Developer Mode can find the packages it needs.
+
+## Step 4: Enable Developer Mode
 
 1. Go to **Settings**
 2. Scroll down to **Security**
@@ -18,34 +38,20 @@ On your Nokia N9, open the Nokia Store and search for "Developer Mode". Install 
 4. Toggle it **ON**
 5. Accept the terms and conditions
 
-Your device will download and install the necessary packages. This may take a few minutes.
+Your device will download and install Terminal, SDK Connection, and the other developer tools. This takes a few minutes.
 
-## Step 3: Access the terminal
+## Step 5: Access the terminal
 
-Once enabled, you can access the terminal by tapping the **Terminal** icon in your applications menu.
+Tap the **Terminal** icon in your applications menu.
 
-## Step 4: Gain root access
+## Step 6: Gain root access
 
-In the terminal, type:
+In the terminal:
 
-```
+```bash
 devel-su
+# password is rootme
 ```
-
-Enter the root password you set during developer mode activation.
-
-## Step 5: Add the mirror
-
-Now that you have root access, you can configure the N9 Mirror for package downloads:
-
-```
-devel-su
-wget https://n9.mpw.sh/n9-mirror-setup.deb
-dpkg -i n9-mirror-setup.deb
-apt-get update
-```
-
-Or do it manually — see the [Setup page](/setup) for the full sources.list.
 
 ---
 

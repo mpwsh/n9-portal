@@ -11,7 +11,7 @@ set -euo pipefail
 
 PKG_NAME="n9-mirror-setup"
 SHORT_PKG_NAME="setup"
-PKG_VERSION="1.0-1"
+PKG_VERSION="1.0-2"
 MAINTAINER="N9 Mirror <admin@mpw.sh>"
 HOMEPAGE="https://n9.mpw.sh"
 DISPLAY_NAME="N9 Mirror Setup"
@@ -40,6 +40,9 @@ cat >"$PKG_DIR/etc/apt/sources.list.d/n9-mirror.list" <<'EOF'
 deb http://n9.mpw.sh/n9mirror/001 ./
 deb http://n9.mpw.sh/n9mirror/apps ./
 deb http://n9.mpw.sh/n9mirror/tools ./
+
+# OpenRepos mirror
+deb http://n9.mpw.sh/openrepos ./
 
 # Standard repository (Harmattan SDK)
 # deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
