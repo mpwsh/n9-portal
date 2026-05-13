@@ -50,7 +50,7 @@ The Workers runtime serves the static site directly. Only requests that don't ma
 │   │   ├── index.astro        Landing
 │   │   ├── browse.astro       Raw bucket file browser
 │   │   ├── firmware.astro     Firmware images (scoped browser over images/)
-│   │   ├── design.astro       Design assets (scoped browser over design/)
+│   │   ├── developers.astro   Developers lobby (cards link to /developers/docs, /developers/ux, .zip downloads)
 │   │   ├── manuals.astro      Service manual & schematics (scoped browser over manuals/)
 │   │   ├── packages/
 │   │   │   ├── index.astro    Searchable package catalog

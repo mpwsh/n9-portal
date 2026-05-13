@@ -1,0 +1,111 @@
+---
+import Base from "../layouts/Base.astro";
+
+/**
+ * Lobby cards. Two affordances:
+ *   - "open"  — opens an external HTML tree (the Nokia static sites) in a new tab
+ *   - "down"  — direct .zip download from R2
+ *
+ * The "kind" controls the icon (↗ vs ↓) and whether the link gets target="_blank".
+ */
+type CardKind = "open" | "down";
+interface Card {
+  title: string;
+  sub: string;
+  note: string;
+  href: string;
+  cta: string;
+  kind: CardKind;
+}
+
+const cards: Card[] = [
+  {
+    title: "Harmattan developer documentation",
+    sub: "The full reference",
+    note: "Every page Nokia published for people writing apps for the N9 — Qt Quick, MeeGo Touch, the Platform API, signing, the Aegis sandbox. Mirrored verbatim from the offline harmattan-dev.nokia.com site.",
+    href: "/developers/docs/",
+    cta: "Open dev docs",
+    kind: "open",
+  },
+  {
+    title: "UX guidelines",
+    sub: "How the OS was meant to feel",
+    note: "Nokia's house style for Harmattan apps — gestures, the swipe model, layout grids, sound, motion. The companion to the dev docs for anyone trying to make an app fit the OS.",
+    href: "/developers/ux/",
+    cta: "Open UX guidelines",
+    kind: "open",
+  },
+  {
+    title: "CoreUI Toolkit",
+    sub: "Harmattan UI assets, v1.6",
+    note: "Nokia's developer-facing UI kit: buttons, indicators, controls, the lot. The original 2011 distribution.",
+    href: "/developers/ux/NokiaN9_CoreUI_Toolkit_1.6.zip",
+    cta: "Download (.zip)",
+    kind: "down",
+  },
+  {
+    title: "Icon Templates",
+    sub: "Launcher icon kit",
+    note: "Photoshop templates and the icon design spec Nokia handed third-party developers in 2011, so apps would sit naturally on the launcher grid.",
+    href: "/developers/ux/NokiaN9_Icon_Templates.zip",
+    cta: "Download (.zip)",
+    kind: "down",
+  },
+];
+---
+
+<Base title="Developers — N9 Archive" active="developers">
+  <article class="mx-auto max-w-screen-xl px-6 pt-16 pb-10 md:px-10 md:pt-20 lg:px-16">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      For developers
+    </p>
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
+      What Nokia handed builders.
+    </h1>
+    <div
+      class="mt-8 max-w-[40rem] space-y-5 font-serif text-[1.0625rem] leading-[1.7] text-n9-200 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      <p>
+        Reference material from Nokia for the people writing software and
+        designing interfaces for the N9. The developer documentation, the UX
+        guidelines that defined the platform's feel, and the original UI kit
+        and icon templates — preserved in the form Nokia shipped them.
+      </p>
+    </div>
+  </article>
+
+  <section class="mx-auto max-w-screen-xl px-6 py-6 pb-20 md:px-10 lg:px-16">
+    <div class="grid gap-4 md:grid-cols-2">
+      {cards.map((card) => (
+        <a
+          href={card.href}
+          target={card.kind === "open" ? "_blank" : undefined}
+          rel={card.kind === "open" ? "noopener" : undefined}
+          class="group flex flex-col gap-3 rounded-lg border border-n9-700 bg-n9-900/40 p-5 transition hover:border-n9-500"
+        >
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-n9-500">
+              {card.sub}
+            </p>
+            <h2
+              class="mt-1.5 font-serif text-xl text-white"
+              style="font-variation-settings: 'opsz' 24;"
+            >
+              {card.title}
+            </h2>
+          </div>
+          <p class="flex-1 text-sm leading-relaxed text-n9-300">
+            {card.note}
+          </p>
+          <p class="text-xs font-medium text-n9-200 group-hover:text-white">
+            {card.cta} {card.kind === "open" ? "↗" : "↓"}
+          </p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

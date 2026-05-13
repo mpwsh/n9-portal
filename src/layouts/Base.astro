@@ -5,7 +5,7 @@ interface Props {
   title: string;
   description?: string;
   /** Which nav item is active for highlighting */
-  active?: "home" | "packages" | "firmware" | "design" | "manuals" | "guides" | "docs";
+  active?: "home" | "packages" | "firmware" | "developers" | "manuals" | "guides";
 }
 
 const {
@@ -17,9 +17,8 @@ const {
 const navItems = [
   { key: "packages", label: "Packages", href: "/packages" },
   { key: "firmware", label: "Firmware", href: "/firmware" },
-  { key: "design", label: "Design", href: "/design" },
+  { key: "developers", label: "Developers", href: "/developers" },
   { key: "manuals", label: "Manuals", href: "/manuals" },
-  { key: "docs", label: "Dev docs", href: "/docs/" },
   { key: "guides", label: "Guides", href: "/guides/" },
 ] as const;
 ---
@@ -70,7 +69,7 @@ const navItems = [
           </svg>
         </button>
 
-        <nav class="hidden items-center gap-5 md:flex">
+        <nav class="hidden items-center gap-6 md:flex">
           {navItems.map((item) => (
             <a
               href={item.href}
@@ -124,7 +123,7 @@ const navItems = [
           >
             WunderW
           </a>
-          for keeping mirrors alive and continued contributions.
+          for keeping mirrors alive and sharing them.
         </p>
       </div>
     </footer>

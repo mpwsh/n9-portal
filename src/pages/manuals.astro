@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import MirrorBrowser from "../components/MirrorBrowser.astro";
 
 /**
- * Featured manuals. Pointers into the browser, same pattern as /design —
+ * Featured manuals. Pointers into the browser — clicking scrolls and
  * each card fires a `mirror-browser-go` event with a target path.
  *
  * Filenames here are placeholders that match the working directory listing.
@@ -91,7 +91,7 @@ const featured = [
 </Base>
 
 <script is:inline>
-  // Same cross-component bridge as /design — fires a custom event the
+  // Cross-component bridge — fires a custom event the
   // MirrorBrowser listens for.
   document.addEventListener("click", (ev) => {
     const card = ev.target.closest(".featured-card");
