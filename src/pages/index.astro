@@ -2,116 +2,68 @@
 import Base from "../layouts/Base.astro";
 ---
 
-<Base title="N9 Mirror — MeeGo Harmattan Repository" active="home">
-  <section class="mx-auto max-w-screen-xl px-6 py-20 md:px-10 md:py-28 lg:px-16">
-    <div class="max-w-3xl">
-      <p class="mb-4 text-sm font-medium uppercase tracking-wider text-n9-400">
-        Community archive
+<Base title="N9 Archive" active="home">
+  <article class="mx-auto max-w-[36rem] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
+    <p class="mb-8 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      For the Nokia N9 · MeeGo Harmattan
+    </p>
+
+    <h1
+      class="font-serif text-5xl font-normal leading-[1.05] tracking-tight text-white md:text-6xl"
+      style="font-variation-settings: 'opsz' 60;"
+    >
+      Still on.
+    </h1>
+
+    <div
+      class="mt-12 space-y-7 font-serif text-[1.0625rem] leading-[1.7] text-n9-200 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      <p>
+        The Nokia N9 shipped in 2011 with a gesture-driven OS nobody else
+        made, and a year later Nokia walked away from it. The hardware kept
+        working. So did the people who liked it. This is where their work
+        lives.
       </p>
-      <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl lg:text-6xl">
-        MeeGo Harmattan, still alive.
-      </h1>
-      <p class="mt-6 text-lg font-medium text-n9-300 md:text-xl">
-        A mirror of the original Nokia developer repositories and community tools
-        for the Nokia N9. Keeping the swipe alive.
+
+      <p>
+        A working device needs <a href="/guides/developer-mode" class="archive-link">developer
+        mode</a> turned on first — the one switch that opens the phone up to
+        anything beyond the App Store. After that, the
+        <a href="/packages" class="archive-link">package catalog</a>
+        holds the original Nokia binaries, the Harmattan SDK, the community
+        apps and developer tools, and the OpenRepos collection, each with
+        install commands and descriptions intact.
       </p>
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a
-          href="/setup"
-          class="flex h-11 items-center rounded-md bg-n9-100 px-5 text-sm font-medium text-n9-900 transition hover:bg-white"
-        >
-          Add the mirror
-        </a>
-        <a
-          href="/browse"
-          class="flex h-11 items-center rounded-md border border-n9-700 bg-n9-800 px-5 text-sm font-medium text-n9-100 transition hover:border-n9-500"
-        >
-          Browse archive
-        </a>
-      </div>
+
+      <p>
+        A bricked device is its own thing. The
+        <a href="/guides/flashing" class="archive-link">flashing guide</a>
+        walks through reviving one or installing firmware from scratch, with
+        <a href="/guides/flasher-troubleshooting" class="archive-link">troubleshooting
+        notes</a> for the parts that tend to go wrong;
+        <a href="/firmware" class="archive-link">firmware images</a> for every
+        region are kept alongside it. If the work goes past flashing, the
+        <a href="/manuals" class="archive-link">service manual and schematics</a>
+        are here too.
+      </p>
+
+      <p>
+        The <a href="/docs/" class="archive-link">Harmattan developer
+        documentation</a> is here in full, verbatim from the offline Nokia
+        site, and the
+        <a href="/design" class="archive-link">design archive</a> keeps the
+        original Nokia Pure typeface, the CoreUI toolkit, and the launcher
+        icon kit Nokia shipped to developers in 2011. The rest of the
+        <a href="/guides/" class="archive-link">guides</a> collect the small
+        fixes that come up when a phone is fifteen years old.
+      </p>
+
+      <p class="text-n9-300">
+        Free to use. The
+        <a href="https://github.com/mpwsh/n9-portal" rel="noopener" class="archive-link">source
+        is on GitHub</a>.
+      </p>
     </div>
-  </section>
-
-  <section class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-20 md:px-10 lg:px-16">
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <a
-        href="/setup"
-        class="group rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
-      >
-        <div class="mb-4 text-3xl">⚙️</div>
-        <h2 class="mb-2 text-xl font-semibold text-white">Setup</h2>
-        <p class="text-sm text-n9-300">
-          Add the mirror to your N9 — one-line install or manual sources.list.
-        </p>
-        <p class="mt-4 text-sm font-medium text-n9-200 group-hover:text-white">
-          Get started →
-        </p>
-      </a>
-
-      <a
-        href="/browse"
-        class="group rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
-      >
-        <div class="mb-4 text-3xl">📦</div>
-        <h2 class="mb-2 text-xl font-semibold text-white">Browse</h2>
-        <p class="text-sm text-n9-300">
-          Explore the full mirror — SDK packages, Nokia binaries, firmware, tools.
-        </p>
-        <p class="mt-4 text-sm font-medium text-n9-200 group-hover:text-white">
-          Open browser →
-        </p>
-      </a>
-
-      <a
-        href="/docs/"
-        class="group rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
-      >
-        <div class="mb-4 text-3xl">📖</div>
-        <h2 class="mb-2 text-xl font-semibold text-white">Docs</h2>
-        <p class="text-sm text-n9-300">
-          The original Nokia Harmattan developer documentation, mirrored intact.
-        </p>
-        <p class="mt-4 text-sm font-medium text-n9-200 group-hover:text-white">
-          Open docs →
-        </p>
-      </a>
-
-      <a
-        href="/guides/"
-        class="group rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
-      >
-        <div class="mb-4 text-3xl">📚</div>
-        <h2 class="mb-2 text-xl font-semibold text-white">Guides</h2>
-        <p class="text-sm text-n9-300">
-          Step-by-step tutorials — developer mode, app installation, and more.
-        </p>
-        <p class="mt-4 text-sm font-medium text-n9-200 group-hover:text-white">
-          Read guides →
-        </p>
-      </a>
-    </div>
-  </section>
-
-  <section class="mx-auto max-w-screen-xl border-t border-n9-800 px-6 py-20 md:px-10 lg:px-16">
-    <div class="grid gap-12 md:grid-cols-2">
-      <div>
-        <h2 class="mb-4 text-2xl font-semibold text-white">Why this exists</h2>
-        <p class="text-base text-n9-300 leading-relaxed">
-          The original Nokia repositories at <code class="rounded bg-n9-800 px-1.5 py-0.5 text-sm">harmattan-dev.nokia.com</code> went
-          offline years ago. This is a community mirror, served from
-          Cloudflare R2, free for anyone who still loves their N9.
-        </p>
-      </div>
-      <div>
-        <h2 class="mb-4 text-2xl font-semibold text-white">What's mirrored</h2>
-        <ul class="space-y-2 text-base text-n9-300">
-          <li>• Harmattan SDK (free, non-free, source)</li>
-          <li>• Nokia binary packages</li>
-          <li>• N9 community flat repos (001, apps, tools)</li>
-          <li>• Firmware images and flashing tools</li>
-          <li>• The original Harmattan developer documentation</li>
-        </ul>
-      </div>
-    </div>
-  </section>
+  </article>
 </Base>

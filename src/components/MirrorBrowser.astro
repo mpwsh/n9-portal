@@ -20,6 +20,7 @@ const {
 <div
   x-data={`mirrorBrowser(${JSON.stringify({ rootPrefix, altPrefix, rootLabel, altLabel })})`}
   x-init="init()"
+  @mirror-browser-go.window="handleGoEvent($event)"
 >
   {altPrefix && (
     <div class="mb-6 flex gap-2 border-b border-n9-800">
@@ -101,17 +102,32 @@ const {
     </template>
 
     <template x-for="file in filtered.files" :key="file.key">
-      <a
-        :href="'/' + file.key"
-        class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm last:border-b-0 hover:bg-n9-700/30"
-      >
-        <span x-text="fileIcon(file.name)"></span>
-        <span class="flex-1 truncate text-n9-100" x-text="file.name"></span>
-        <span
-          class="shrink-0 text-xs tabular-nums text-n9-400"
-          x-text="formatSize(file.size)"
-        ></span>
-      </a>
+      <template x-if="file.name.endsWith('.deb')">
+        <button
+          @click="openInstallModal(file)"
+          class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm last:border-b-0 hover:bg-n9-700/30"
+        >
+          <span x-text="fileIcon(file.name)"></span>
+          <span class="flex-1 truncate text-n9-100" x-text="file.name"></span>
+          <span
+            class="shrink-0 text-xs tabular-nums text-n9-400"
+            x-text="formatSize(file.size)"
+          ></span>
+        </button>
+      </template>
+      <template x-if="!file.name.endsWith('.deb')">
+        <a
+          :href="'/' + file.key"
+          class="flex w-full items-center gap-3 border-b border-n9-700 px-4 py-2.5 text-left text-sm last:border-b-0 hover:bg-n9-700/30"
+        >
+          <span x-text="fileIcon(file.name)"></span>
+          <span class="flex-1 truncate text-n9-100" x-text="file.name"></span>
+          <span
+            class="shrink-0 text-xs tabular-nums text-n9-400"
+            x-text="formatSize(file.size)"
+          ></span>
+        </a>
+      </template>
     </template>
   </div>
 
@@ -123,6 +139,85 @@ const {
       x-cloak
       class="ml-2 text-amber-400"
     >(listing truncated — narrow the path)</span>
+  </div>
+
+  {/* Install modal — appears when a .deb row is clicked. */}
+  <div
+    x-show="installModal"
+    x-cloak
+    @keydown.escape.window="closeInstallModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  >
+    <div
+      @click="closeInstallModal()"
+      class="absolute inset-0 bg-n9-950/70 backdrop-blur-sm"
+    ></div>
+    <div
+      x-show="installModal"
+      x-transition:enter="transition ease-out duration-150"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      class="relative w-full max-w-lg rounded-lg border border-n9-700 bg-n9-900 p-6 shadow-xl"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wider text-n9-400">
+            Package
+          </p>
+          <h2
+            class="mt-1 font-mono text-2xl font-semibold text-white"
+            x-text="installModal?.packageName"
+          ></h2>
+          <p class="mt-1 text-xs text-n9-400">
+            <span x-text="installModal?.filename"></span>
+            <span class="mx-1.5 text-n9-700">·</span>
+            <span x-text="formatSize(installModal?.size)"></span>
+          </p>
+        </div>
+        <button
+          @click="closeInstallModal()"
+          aria-label="Close"
+          class="rounded-md p-1.5 text-n9-400 hover:bg-n9-800 hover:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4">
+            <path d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <p class="mt-5 text-xs text-n9-400">
+        If you've already added the mirror, install it from the device with:
+      </p>
+      <div class="mt-2 flex items-stretch gap-2">
+        <code
+          class="flex-1 overflow-x-auto rounded-md bg-n9-950 px-3 py-2.5 font-mono text-sm text-n9-100"
+          x-text="installModal && ('apt-get install ' + installModal.packageName)"
+        ></code>
+        <button
+          @click="copyInstallCommand()"
+          class="shrink-0 rounded-md border border-n9-700 bg-n9-800 px-3 text-xs font-medium text-n9-100 hover:border-n9-500"
+          x-text="copied ? 'Copied' : 'Copy'"
+        ></button>
+      </div>
+      <p class="mt-2 text-[11px] text-n9-500">
+        Run with <code class="rounded bg-n9-950 px-1 py-0.5">devel-su</code> if you aren't already root.
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-2">
+        <a
+          :href="installModal ? '/' + installModal.key : '#'"
+          class="flex h-9 items-center rounded-md bg-n9-100 px-4 text-xs font-medium text-n9-900 hover:bg-white"
+        >
+          Download .deb
+        </a>
+        <a
+          href="/setup"
+          class="flex h-9 items-center rounded-md border border-n9-700 bg-n9-800 px-4 text-xs font-medium text-n9-100 hover:border-n9-500"
+        >
+          Need to add the mirror?
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -140,6 +235,8 @@ const {
       folders: [],
       files: [],
       truncated: false,
+      installModal: null,
+      copied: false,
 
       rootPathForTab() {
         return this.tab === "root" ? this.rootPrefix : this.altPrefix;
@@ -185,20 +282,47 @@ const {
         this.load();
       },
 
+      handleGoEvent(ev) {
+        // Lets external buttons (e.g. featured cards on /design) drive this
+        // browser to a path. We only honor paths within rootPrefix so a stray
+        // listener can't push the user outside their scope.
+        const target = ev.detail && ev.detail.path;
+        if (typeof target !== "string") return;
+        const normalized = target.replace(/^\//, "");
+        const root = this.rootPathForTab() || "";
+        if (!normalized.startsWith(root)) return;
+        const ensureTrailing = normalized.endsWith("/") ? normalized : normalized + "/";
+        this.navigate(ensureTrailing);
+      },
+
       navigateUp() {
+        const root = this.rootPathForTab() || "";
         const trimmed = this.currentPath.replace(/\/$/, "");
         const idx = trimmed.lastIndexOf("/");
-        this.currentPath = idx >= 0 ? trimmed.slice(0, idx + 1) : "";
+        const parent = idx >= 0 ? trimmed.slice(0, idx + 1) : "";
+        // Don't walk above the configured root.
+        this.currentPath = parent.startsWith(root) ? parent : root;
         this.load();
       },
 
       get breadcrumbs() {
-        const parts = this.currentPath
-          .replace(/\/$/, "")
-          .split("/")
-          .filter(Boolean);
-        const crumbs = [{ label: "root", path: "" }];
-        let acc = "";
+        // Display breadcrumbs relative to rootPrefix. For a scoped browser
+        // (e.g. rootPrefix="images/") we want "images / sub-dir / …", not
+        // "root / images / sub-dir / …". For the unscoped browser
+        // (rootPrefix=""), we fall back to a plain "root" label.
+        const root = this.rootPathForTab() || "";
+        const isAtRoot = this.currentPath === root || this.currentPath === "";
+        let rel = this.currentPath;
+        if (root && rel.startsWith(root)) {
+          rel = rel.slice(root.length);
+        }
+        const parts = rel.replace(/\/$/, "").split("/").filter(Boolean);
+
+        // Root label: last segment of rootPrefix, or "root" if no scope.
+        const rootSegment = (root.replace(/\/$/, "").split("/").pop()) || "root";
+        const crumbs = [{ label: rootSegment, path: root }];
+
+        let acc = root;
         for (const part of parts) {
           acc += part + "/";
           crumbs.push({ label: part, path: acc });
@@ -237,6 +361,38 @@ const {
           i++;
         }
         return n.toFixed(n < 10 && i > 0 ? 1 : 0) + " " + units[i];
+      },
+
+      packageNameFromFilename(name) {
+        const m = name.match(/^([^_]+)_/);
+        return m ? m[1] : name.replace(/\.deb$/, "");
+      },
+
+      openInstallModal(file) {
+        this.installModal = {
+          key: file.key,
+          filename: file.name,
+          size: file.size,
+          packageName: this.packageNameFromFilename(file.name),
+        };
+        this.copied = false;
+      },
+
+      closeInstallModal() {
+        this.installModal = null;
+        this.copied = false;
+      },
+
+      async copyInstallCommand() {
+        if (!this.installModal) return;
+        const cmd = "apt-get install " + this.installModal.packageName;
+        try {
+          await navigator.clipboard.writeText(cmd);
+          this.copied = true;
+          setTimeout(() => { this.copied = false; }, 1500);
+        } catch {
+          // Clipboard API might be blocked. Best-effort fallback only.
+        }
       },
     };
   };

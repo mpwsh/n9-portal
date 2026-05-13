@@ -1,0 +1,246 @@
+---
+import Base from "../../layouts/Base.astro";
+import PackageIcon from "../../components/PackageIcon.astro";
+import { getDeduplicatedPackages, REPOS, truncate } from "../../lib/packages";
+
+// Build-time: render the full deduped catalog into the page payload.
+// The client does filtering, repo selection, and pagination over this array.
+const allPackages = getDeduplicatedPackages();
+
+// Strip down to fields actually rendered on this page. Reduces payload size
+// significantly (no full descriptions, no icons in the JSON — icons are
+// rendered server-side, descriptions stay short).
+const initialRows = allPackages.map((p) => ({
+  name: p.name,
+  version: p.version,
+  repoId: p.repoId,
+  repoLabel: p.repoLabel,
+  section: p.section || "",
+  description: truncate(p.descriptionShort, 100),
+  repoCount: p.repoCount,
+}));
+
+// Repo counts for the tab badges
+const repoCounts: Record<string, number> = { all: allPackages.length };
+for (const repo of REPOS) {
+  repoCounts[repo.id] = allPackages.filter((p) => p.repoId === repo.id).length;
+}
+
+// We render server-side a "first page" of icon-bearing markup keyed by name.
+// The Alpine layer then re-renders rows from the JSON array as the user
+// filters/paginates — for icons during interaction we fall back to the generic
+// glyph (otherwise we'd ship every base64 PNG to the client, ~tens of MB).
+const initialPage = allPackages.slice(0, 50);
+---
+
+<Base title="Packages — N9 Archive" active="packages">
+  <section class="mx-auto max-w-screen-xl px-6 py-12 md:px-10 lg:px-16">
+    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+      Packages
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-n9-300">
+      Everything installable across the mirror, indexed from each repo's
+      <code class="rounded bg-n9-800 px-1.5 py-0.5 text-sm">Packages.gz</code>.
+      Click a package for its install command, description, and dependencies.
+    </p>
+    <p class="mt-3 max-w-2xl text-sm text-n9-400">
+      Want the raw file tree instead?
+      <a href="/browse" class="archive-link">
+        Browse the archive
+      </a>.
+    </p>
+  </section>
+
+  <section
+    class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16"
+    x-data={`packageList(${JSON.stringify({ rows: initialRows })})`}
+    x-init="init()"
+  >
+    {/* Repo filter tabs */}
+    <div class="mb-4 -mx-1 flex flex-wrap gap-1 overflow-x-auto pb-1">
+      <button
+        @click="setRepo('all')"
+        :class="repo === 'all' ? 'border-n9-100 bg-n9-800 text-white' : 'border-n9-700 bg-n9-900 text-n9-300 hover:text-white'"
+        class="shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+      >
+        All
+        <span class="ml-1.5 text-[10px] text-n9-400 tabular-nums">{repoCounts.all}</span>
+      </button>
+      {REPOS.map((repo) => (
+        <button
+          @click={`setRepo('${repo.id}')`}
+          x-bind:class={`repo === '${repo.id}' ? 'border-n9-100 bg-n9-800 text-white' : 'border-n9-700 bg-n9-900 text-n9-300 hover:text-white'`}
+          class="shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+        >
+          {repo.label}
+          <span class="ml-1.5 text-[10px] text-n9-400 tabular-nums">{repoCounts[repo.id] ?? 0}</span>
+        </button>
+      ))}
+    </div>
+
+    {/* Search */}
+    <div class="mb-4 flex flex-wrap items-center gap-3">
+      <input
+        type="search"
+        x-model="query"
+        @input="page = 1"
+        placeholder="Search by name or description…"
+        class="flex-1 rounded-md border border-n9-700 bg-n9-800 px-3 py-2 text-sm text-n9-100 placeholder-n9-500 focus:border-n9-500 focus:outline-none"
+      />
+      <div class="text-xs text-n9-400 tabular-nums">
+        <span x-text="filtered.length"></span> results
+      </div>
+    </div>
+
+    {/* Server-rendered first 50 rows. Once the user interacts, the Alpine
+        template below takes over. No x-cloak here — we want this visible
+        before Alpine hydrates so the page isn't blank on first paint. */}
+    <ul
+      x-show="!interactive"
+      class="overflow-hidden rounded-lg border border-n9-700 bg-n9-800"
+    >
+      {initialPage.map((pkg) => (
+        <li class="border-b border-n9-700 last:border-b-0">
+          <a
+            href={`/packages/${encodeURIComponent(pkg.name)}`}
+            class="flex items-center gap-3 px-4 py-3 hover:bg-n9-700/30"
+          >
+            <PackageIcon icon={pkg.icon} name={pkg.name} size="sm" />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-2">
+                <span class="truncate font-mono text-sm font-medium text-white">
+                  {pkg.name}
+                </span>
+                <span class="shrink-0 text-[11px] text-n9-500 tabular-nums">
+                  {pkg.version}
+                </span>
+              </div>
+              <p class="truncate text-xs text-n9-400">
+                {truncate(pkg.descriptionShort, 100)}
+              </p>
+            </div>
+            <span class="shrink-0 rounded-full border border-n9-700 px-2 py-0.5 text-[10px] font-medium text-n9-300">
+              {pkg.repoLabel}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {/* Interactive list, driven entirely by Alpine over the JSON payload */}
+    <ul
+      x-show="interactive"
+      x-cloak
+      class="overflow-hidden rounded-lg border border-n9-700 bg-n9-800"
+    >
+      <template x-if="paginated.length === 0">
+        <li class="px-6 py-12 text-center text-sm text-n9-400">
+          Nothing matches that.
+        </li>
+      </template>
+      <template x-for="pkg in paginated" :key="pkg.repoId + ':' + pkg.name">
+        <li class="border-b border-n9-700 last:border-b-0">
+          <a
+            :href="'/packages/' + encodeURIComponent(pkg.name)"
+            class="flex items-center gap-3 px-4 py-3 hover:bg-n9-700/30"
+          >
+            <div class="size-8 shrink-0 rounded-md border border-n9-700 bg-n9-900 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-n9-500">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-2">
+                <span class="truncate font-mono text-sm font-medium text-white" x-text="pkg.name"></span>
+                <span class="shrink-0 text-[11px] text-n9-500 tabular-nums" x-text="pkg.version"></span>
+                <span
+                  x-show="pkg.repoCount > 1"
+                  class="shrink-0 text-[10px] text-n9-500"
+                  x-text="'+' + (pkg.repoCount - 1) + ' more'"
+                ></span>
+              </div>
+              <p class="truncate text-xs text-n9-400" x-text="pkg.description"></p>
+            </div>
+            <span class="shrink-0 rounded-full border border-n9-700 px-2 py-0.5 text-[10px] font-medium text-n9-300" x-text="pkg.repoLabel"></span>
+          </a>
+        </li>
+      </template>
+    </ul>
+
+    {/* Pagination */}
+    <div
+      x-show="interactive && filtered.length > pageSize"
+      x-cloak
+      class="mt-4 flex items-center justify-between gap-3"
+    >
+      <button
+        @click="page = Math.max(1, page - 1)"
+        :disabled="page === 1"
+        class="rounded-md border border-n9-700 bg-n9-800 px-3 py-1.5 text-xs font-medium text-n9-100 hover:border-n9-500 disabled:opacity-40 disabled:hover:border-n9-700"
+      >
+        ← Previous
+      </button>
+      <p class="text-xs text-n9-400 tabular-nums">
+        Page <span x-text="page"></span> of <span x-text="totalPages"></span>
+      </p>
+      <button
+        @click="page = Math.min(totalPages, page + 1)"
+        :disabled="page >= totalPages"
+        class="rounded-md border border-n9-700 bg-n9-800 px-3 py-1.5 text-xs font-medium text-n9-100 hover:border-n9-500 disabled:opacity-40 disabled:hover:border-n9-700"
+      >
+        Next →
+      </button>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  window.packageList = function (config) {
+    return {
+      rows: config.rows,
+      query: "",
+      repo: "all",
+      page: 1,
+      pageSize: 50,
+      // We don't show the interactive list until the user interacts. This lets
+      // the server-rendered first page (with real icons) ship as the initial
+      // paint, then Alpine takes over for filtering/paging.
+      interactive: false,
+
+      init() {
+        // Flip to interactive on any meaningful interaction.
+        this.$watch("query", () => { this.interactive = true; });
+        this.$watch("repo", () => { this.interactive = true; });
+        this.$watch("page", () => { this.interactive = true; });
+      },
+
+      setRepo(id) {
+        this.repo = id;
+        this.page = 1;
+      },
+
+      get filtered() {
+        const q = this.query.trim().toLowerCase();
+        return this.rows.filter((r) => {
+          if (this.repo !== "all" && r.repoId !== this.repo) return false;
+          if (!q) return true;
+          return (
+            r.name.toLowerCase().includes(q) ||
+            r.description.toLowerCase().includes(q)
+          );
+        });
+      },
+
+      get totalPages() {
+        return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+      },
+
+      get paginated() {
+        const start = (this.page - 1) * this.pageSize;
+        return this.filtered.slice(start, start + this.pageSize);
+      },
+    };
+  };
+</script>

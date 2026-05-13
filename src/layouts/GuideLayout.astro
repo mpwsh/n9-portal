@@ -12,77 +12,109 @@ const { frontmatter } = Astro.props;
 ---
 
 <Base
-  title={`${frontmatter.title} — N9 Mirror`}
+  title={`${frontmatter.title} — N9 Archive`}
   description={frontmatter.description}
   active="guides"
 >
-  <article class="mx-auto max-w-3xl px-6 py-12 md:px-10">
-    <a
-      href="/guides/"
-      class="mb-8 inline-block text-sm font-medium text-n9-400 hover:text-n9-200"
-    >
-      ← All guides
-    </a>
+  <article class="mx-auto max-w-3xl px-6 pt-16 pb-20 md:px-10 md:pt-20 md:pb-28">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Guide
+    </p>
 
-    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.1] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
       {frontmatter.title}
     </h1>
+
     {frontmatter.description && (
-      <p class="mt-4 text-lg text-n9-300">{frontmatter.description}</p>
+      <p
+        class="mt-5 max-w-[36rem] font-serif text-[1.0625rem] leading-[1.7] text-n9-300 md:text-[1.125rem]"
+        style="font-variation-settings: 'opsz' 16;"
+      >
+        {frontmatter.description}
+      </p>
     )}
 
-    <div class="prose-guide mt-12">
+    <hr class="my-10 border-n9-800/60" />
+
+    <div class="prose-guide">
       <slot />
     </div>
+
+    <hr class="mt-16 mb-6 border-n9-800/60" />
+
+    <p class="text-sm text-n9-500">
+      <a href="/guides/" class="archive-link">← Back to all guides</a>
+    </p>
   </article>
 </Base>
 
 <style is:global>
-  /* Hand-rolled prose styles, since we're avoiding the Tailwind typography
-     plugin (it would add another dep and we only need a few elements). */
+  /* Hand-rolled prose styles. The body voice is humanist sans, headings are
+     serif at moderate opsz so they sit naturally between the title and the
+     paragraphs without competing. */
   .prose-guide {
     color: var(--color-n9-200);
     font-size: 1rem;
-    line-height: 1.7;
+    line-height: 1.75;
+    max-width: 36rem;
   }
   .prose-guide > * + * {
     margin-top: 1.25em;
   }
   .prose-guide h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-family: var(--font-serif);
+    font-variation-settings: 'opsz' 24;
+    font-size: 1.625rem;
+    font-weight: 400;
     color: white;
-    margin-top: 2em;
+    letter-spacing: -0.005em;
+    margin-top: 2.25em;
     margin-bottom: 0.5em;
   }
   .prose-guide h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-family: var(--font-serif);
+    font-variation-settings: 'opsz' 18;
+    font-size: 1.25rem;
+    font-weight: 500;
     color: white;
-    margin-top: 1.5em;
+    margin-top: 1.75em;
     margin-bottom: 0.5em;
   }
-  .prose-guide p {
-    color: var(--color-n9-300);
-  }
+  .prose-guide p { color: var(--color-n9-200); }
   .prose-guide ul,
   .prose-guide ol {
     padding-left: 1.5em;
-    color: var(--color-n9-300);
+    color: var(--color-n9-200);
   }
   .prose-guide ul { list-style: disc; }
   .prose-guide ol { list-style: decimal; }
   .prose-guide li { margin: 0.4em 0; }
+  .prose-guide li::marker { color: var(--color-n9-500); }
   .prose-guide strong { color: white; font-weight: 600; }
+
+  /* Inherit the global link treatment so prose links match links on every
+     other page. */
   .prose-guide a {
-    color: var(--color-n9-100);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: var(--color-n9-600);
+    color: var(--color-n9-50);
+    border-bottom: 1px solid var(--color-accent-soft);
+    padding-bottom: 1px;
+    transition: border-color 150ms ease, color 150ms ease;
+    text-decoration: none;
   }
   .prose-guide a:hover {
-    text-decoration-color: var(--color-n9-300);
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
   }
+  .prose-guide a:visited {
+    color: var(--color-n9-300);
+  }
+  .prose-guide a:visited:hover {
+    color: var(--color-accent);
+  }
+
   .prose-guide code {
     background: var(--color-n9-800);
     color: var(--color-n9-100);
@@ -95,11 +127,11 @@ const { frontmatter } = Astro.props;
     background: var(--color-n9-950);
     border: 1px solid var(--color-n9-800);
     color: var(--color-n9-100);
-    padding: 1em;
+    padding: 1em 1.25em;
     border-radius: 0.5em;
     overflow-x: auto;
-    font-size: 0.85em;
-    line-height: 1.5;
+    font-size: 0.875em;
+    line-height: 1.6;
   }
   .prose-guide pre code {
     background: transparent;
@@ -108,12 +140,13 @@ const { frontmatter } = Astro.props;
     font-size: 1em;
   }
   .prose-guide blockquote {
-    border-left: 3px solid var(--color-n9-600);
-    padding: 0.5em 1em;
-    background: oklch(0.339 0.019 260.7 / 0.3);
-    border-radius: 0 0.3em 0.3em 0;
-    color: var(--color-n9-200);
+    border-left: 2px solid var(--color-accent-soft);
+    padding: 0.25em 0 0.25em 1em;
+    background: transparent;
+    color: var(--color-n9-300);
+    font-style: italic;
   }
+  .prose-guide blockquote p { color: var(--color-n9-300); }
   .prose-guide hr {
     border: 0;
     border-top: 1px solid var(--color-n9-800);

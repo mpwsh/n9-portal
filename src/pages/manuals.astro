@@ -1,0 +1,109 @@
+---
+import Base from "../layouts/Base.astro";
+import MirrorBrowser from "../components/MirrorBrowser.astro";
+
+/**
+ * Featured manuals. Pointers into the browser, same pattern as /design —
+ * each card fires a `mirror-browser-go` event with a target path.
+ *
+ * Filenames here are placeholders that match the working directory listing.
+ * If they change, only the `targetPath` strings need updating.
+ */
+const featured = [
+  {
+    title: "Service manual",
+    sub: "RM-696 · L1 / L2",
+    note: "Board layouts, the disassembly procedure, parts list and torque specs. The reference Nokia care points used when one came in for service.",
+    targetPath: "manuals/",
+    cta: "Show in browser",
+  },
+  {
+    title: "Schematics",
+    sub: "RM-696 hardware",
+    note: "Circuit diagrams for the mainboard. Useful for repair work that goes past component swap — tracing power rails, finding test points.",
+    targetPath: "manuals/",
+    cta: "Show in browser",
+  },
+];
+---
+
+<Base title="Manuals — N9 Archive" active="manuals">
+  <article class="mx-auto max-w-screen-xl px-6 pt-16 pb-10 md:px-10 md:pt-20 lg:px-16">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Manuals & schematics
+    </p>
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
+      For the people opening one up.
+    </h1>
+    <div
+      class="mt-8 max-w-[40rem] space-y-5 font-serif text-[1.0625rem] leading-[1.7] text-n9-200 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      <p>
+        The hardware Nokia put behind the gesture: board layouts, schematics,
+        the disassembly procedure care technicians followed. Documents that
+        used to circulate inside service centers, kept here in case someone
+        is still doing the work.
+      </p>
+      <p>
+        More will land here as they come in.
+      </p>
+    </div>
+  </article>
+
+  {/* Featured items — pointers into the browser, not downloads. */}
+  <section class="mx-auto max-w-screen-xl px-6 py-6 md:px-10 lg:px-16">
+    <div class="grid gap-4 md:grid-cols-2">
+      {featured.map((item) => (
+        <button
+          type="button"
+          data-target-path={item.targetPath}
+          class="featured-card group flex flex-col gap-3 rounded-lg border border-n9-700 bg-n9-900/40 p-5 text-left transition hover:border-n9-500"
+        >
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-n9-500">
+              {item.sub}
+            </p>
+            <h2 class="mt-1.5 font-serif text-xl text-white" style="font-variation-settings: 'opsz' 24;">
+              {item.title}
+            </h2>
+          </div>
+          <p class="flex-1 text-sm leading-relaxed text-n9-300">
+            {item.note}
+          </p>
+          <p class="text-xs font-medium text-n9-200 group-hover:text-white">
+            {item.cta} ↓
+          </p>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pt-8 pb-20 md:px-10 lg:px-16" id="manuals-browser">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Browse everything
+    </p>
+    <MirrorBrowser rootPrefix="manuals/" />
+  </section>
+</Base>
+
+<script is:inline>
+  // Same cross-component bridge as /design — fires a custom event the
+  // MirrorBrowser listens for.
+  document.addEventListener("click", (ev) => {
+    const card = ev.target.closest(".featured-card");
+    if (!card) return;
+    const path = card.dataset.targetPath;
+    if (!path) return;
+    window.dispatchEvent(
+      new CustomEvent("mirror-browser-go", { detail: { path } })
+    );
+    const browser = document.getElementById("manuals-browser");
+    if (browser) {
+      browser.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+</script>

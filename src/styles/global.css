@@ -14,6 +14,18 @@
   --color-n9-800: oklch(0.339 0.019 260.7);
   --color-n9-900: oklch(0.256 0.018 266.3);
   --color-n9-950: oklch(0.190 0.015 265.0);
+
+  /* A single warm accent. Used sparingly — link hover, occasional emphasis.
+     The hue echoes the MeeGo launcher's orange Drop indicator without being
+     loud. Two stops: -accent for emphasis, -accent-soft for muted underlines. */
+  --color-accent: oklch(0.82 0.13 65);
+  --color-accent-soft: oklch(0.62 0.08 65);
+
+  /* Serif display & body. Newsreader has an opsz axis we use on the landing
+     for a quietly different headline feel without pulling in a second font. */
+  --font-serif: "Newsreader", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 /* Alpine cloak: hide elements until Alpine initialises */
@@ -24,19 +36,46 @@
 html {
   background-color: var(--color-n9-950);
   color: var(--color-n9-100);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-sans);
 }
 
-/* Smooth scroll for in-page anchors */
 html {
   scroll-behavior: smooth;
 }
 
-/* A subtle decorative gradient at the top, for some life */
 body {
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.339 0.019 260.7 / 0.5), transparent),
-    linear-gradient(to bottom, var(--color-n9-950), var(--color-n9-950));
+    radial-gradient(
+      ellipse 120% 60% at 50% -20%,
+      oklch(0.256 0.018 266.3 / 0.45),
+      transparent 60%
+    );
+  background-repeat: no-repeat;
   min-height: 100vh;
+}
+
+/* Editorial link utility — used in prose contexts throughout the site.
+   Underline visible at rest, accent on hover, dimmer once visited. */
+.archive-link {
+  color: var(--color-n9-50);
+  border-bottom: 1px solid var(--color-accent-soft);
+  padding-bottom: 1px;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.archive-link:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+.archive-link:visited {
+  color: var(--color-n9-300);
+}
+.archive-link:visited:hover {
+  color: var(--color-accent);
+}
+
+/* Focus ring — keyboard users get the same accent. */
+.archive-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 1px;
 }

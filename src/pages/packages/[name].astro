@@ -1,0 +1,233 @@
+---
+import Base from "../../layouts/Base.astro";
+import PackageIcon from "../../components/PackageIcon.astro";
+import InstallCommand from "../../components/InstallCommand.astro";
+import {
+  getUniquePackageNames,
+  getPackageVersions,
+  parseDependencyNames,
+  formatSize,
+  getAllPackages,
+  type Package,
+} from "../../lib/packages";
+
+export async function getStaticPaths() {
+  return getUniquePackageNames().map((name) => ({ params: { name } }));
+}
+
+const { name } = Astro.params;
+const versions = getPackageVersions(name as string);
+
+if (versions.length === 0) {
+  // Shouldn't happen — getStaticPaths only emits names we have — but bail
+  // gracefully if the catalog has drifted between sync and build.
+  return Astro.redirect("/packages");
+}
+
+const primary: Package = versions[0];
+const otherVersions = versions.slice(1);
+
+// Dependency cross-linking: link deps to /packages/<dep> only if we have
+// that package somewhere in the catalog. Build a name set once.
+const allNames = new Set(getAllPackages().map((p) => p.name));
+const deps = parseDependencyNames(primary.depends);
+
+const pageTitle = `${primary.name} — N9 Archive`;
+const pageDescription = primary.descriptionShort;
+---
+
+<Base title={pageTitle} description={pageDescription} active="packages">
+  <section class="mx-auto max-w-screen-xl px-6 pt-10 pb-6 md:px-10 lg:px-16">
+    <nav class="mb-6 text-sm">
+      <a href="/packages" class="text-n9-400 hover:text-white">← All packages</a>
+    </nav>
+
+    <div class="flex items-start gap-5">
+      <PackageIcon icon={primary.icon} name={primary.name} size="md" />
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-medium uppercase tracking-wider text-n9-400">
+          {primary.section || "Package"}
+        </p>
+        <h1 class="mt-1 break-all font-mono text-3xl font-semibold tracking-tight text-white md:text-4xl">
+          {primary.name}
+        </h1>
+        <p class="mt-1 text-sm text-n9-400">
+          <span class="tabular-nums">v{primary.version}</span>
+          <span class="mx-1.5 text-n9-700">·</span>
+          <span>{primary.architecture}</span>
+          <span class="mx-1.5 text-n9-700">·</span>
+          <span>{formatSize(primary.size)}</span>
+          <span class="mx-1.5 text-n9-700">·</span>
+          <span>{primary.repoLabel}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pb-8 md:px-10 lg:px-16">
+    <div class="rounded-lg border border-n9-700 bg-n9-800 p-5 md:p-6">
+      <p class="text-xs font-medium uppercase tracking-wider text-n9-400">
+        Install
+      </p>
+      <p class="mt-2 text-sm text-n9-300">
+        Once the mirror is added, run this on your device:
+      </p>
+      <div class="mt-3">
+        <InstallCommand packageName={primary.name} size="lg" />
+      </div>
+      <p class="mt-3 text-[11px] text-n9-500">
+        Run with <code class="rounded bg-n9-950 px-1 py-0.5">devel-su</code> if
+        you aren't already root.
+        <a href="/guides/developer-mode" class="archive-link ml-1">
+          Mirror not configured yet?
+        </a>
+      </p>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a
+          href={primary.downloadUrl}
+          class="flex h-9 items-center rounded-md border border-n9-700 bg-n9-900 px-4 text-xs font-medium text-n9-100 hover:border-n9-500"
+        >
+          Download .deb directly
+        </a>
+        {primary.homepage && (
+          <a
+            href={primary.homepage}
+            rel="noopener noreferrer"
+            target="_blank"
+            class="flex h-9 items-center rounded-md border border-n9-700 bg-n9-900 px-4 text-xs font-medium text-n9-100 hover:border-n9-500"
+          >
+            Homepage ↗
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pb-8 md:px-10 lg:px-16">
+    <div class="grid gap-6 md:grid-cols-3">
+      {/* Description (2 cols) */}
+      <div class="md:col-span-2">
+        <h2 class="mb-3 text-xs font-medium uppercase tracking-wider text-n9-400">
+          Description
+        </h2>
+        <div
+          x-data="{ expanded: false }"
+          class="rounded-lg border border-n9-700 bg-n9-800 p-5"
+        >
+          {primary.description ? (
+            <>
+              <div
+                class="whitespace-pre-line text-sm text-n9-200 leading-relaxed"
+                x-bind:class="!expanded && 'line-clamp-[10]'"
+              >
+                {primary.description}
+              </div>
+              <button
+                @click="expanded = !expanded"
+                class="mt-3 text-xs font-medium text-n9-300 hover:text-white"
+                x-text="expanded ? 'Show less' : 'Show more'"
+              >
+                Show more
+              </button>
+            </>
+          ) : (
+            <p class="text-sm italic text-n9-500">(no description provided)</p>
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar */}
+      <aside class="space-y-4">
+        <div class="rounded-lg border border-n9-700 bg-n9-800 p-5">
+          <h3 class="text-xs font-medium uppercase tracking-wider text-n9-400">
+            Details
+          </h3>
+          <dl class="mt-3 space-y-2 text-xs">
+            {primary.maintainer && (
+              <div>
+                <dt class="text-n9-500">Maintainer</dt>
+                <dd class="break-all text-n9-200">{primary.maintainer}</dd>
+              </div>
+            )}
+            {primary.section && (
+              <div>
+                <dt class="text-n9-500">Section</dt>
+                <dd class="text-n9-200">{primary.section}</dd>
+              </div>
+            )}
+            <div>
+              <dt class="text-n9-500">Architecture</dt>
+              <dd class="text-n9-200">{primary.architecture}</dd>
+            </div>
+            <div>
+              <dt class="text-n9-500">Size</dt>
+              <dd class="text-n9-200 tabular-nums">{formatSize(primary.size)}</dd>
+            </div>
+            {primary.md5sum && (
+              <div>
+                <dt class="text-n9-500">MD5</dt>
+                <dd class="break-all font-mono text-[11px] text-n9-300">{primary.md5sum}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+
+        {otherVersions.length > 0 && (
+          <div class="rounded-lg border border-n9-700 bg-n9-800 p-5">
+            <h3 class="text-xs font-medium uppercase tracking-wider text-n9-400">
+              Also available in
+            </h3>
+            <ul class="mt-3 space-y-2 text-xs">
+              {otherVersions.map((v) => (
+                <li class="flex items-center justify-between gap-2">
+                  <a
+                    href={v.downloadUrl}
+                    class="archive-link"
+                  >
+                    {v.repoLabel}
+                  </a>
+                  <span class="shrink-0 tabular-nums text-n9-500">v{v.version}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  {deps.length > 0 && (
+    <section class="mx-auto max-w-screen-xl px-6 pb-16 md:px-10 lg:px-16">
+      <h2 class="mb-3 text-xs font-medium uppercase tracking-wider text-n9-400">
+        Dependencies
+      </h2>
+      <div class="rounded-lg border border-n9-700 bg-n9-800 p-5">
+        <ul class="flex flex-wrap gap-1.5">
+          {deps.map((dep) =>
+            allNames.has(dep) ? (
+              <li>
+                <a
+                  href={`/packages/${encodeURIComponent(dep)}`}
+                  class="inline-flex items-center rounded-md border border-n9-700 bg-n9-900 px-2.5 py-1 font-mono text-xs text-n9-100 hover:border-n9-500"
+                >
+                  {dep}
+                </a>
+              </li>
+            ) : (
+              <li>
+                <span class="inline-flex items-center rounded-md border border-dashed border-n9-700 px-2.5 py-1 font-mono text-xs text-n9-400">
+                  {dep}
+                </span>
+              </li>
+            ),
+          )}
+        </ul>
+        <p class="mt-3 text-[11px] text-n9-500">
+          Dashed entries aren't in this mirror — they're typically Nokia system
+          packages that should already be on the device.
+        </p>
+      </div>
+    </section>
+  )}
+</Base>

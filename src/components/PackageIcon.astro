@@ -1,0 +1,59 @@
+---
+/**
+ * PackageIcon — renders the Maemo-Icon-26 base64 PNG if present, otherwise a
+ * generic package glyph. The base64 is inlined as a data: URL.
+ *
+ * Sizes are deliberate, not arbitrary:
+ *   - sm (32px): list view rows
+ *   - md (48px): detail page header
+ *   - lg (96px): hero/landing surfaces if we ever want one
+ */
+interface Props {
+  icon?: string;
+  name: string;
+  size?: "sm" | "md" | "lg";
+}
+
+const { icon, name, size = "sm" } = Astro.props;
+
+const sizePx = size === "lg" ? 96 : size === "md" ? 48 : 32;
+const sizeClass = size === "lg" ? "size-24" : size === "md" ? "size-12" : "size-8";
+---
+
+{icon ? (
+  <img
+    src={`data:image/png;base64,${icon}`}
+    alt={`${name} icon`}
+    width={sizePx}
+    height={sizePx}
+    loading="lazy"
+    decoding="async"
+    class:list={[sizeClass, "shrink-0 rounded-md object-contain"]}
+  />
+) : (
+  <div
+    class:list={[
+      sizeClass,
+      "shrink-0 rounded-md border border-n9-700 bg-n9-800 flex items-center justify-center",
+    ]}
+    aria-hidden="true"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class:list={[
+        size === "lg" ? "size-10" : size === "md" ? "size-6" : "size-4",
+        "text-n9-500",
+      ]}
+    >
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  </div>
+)}

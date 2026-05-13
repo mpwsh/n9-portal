@@ -3,21 +3,27 @@ import Base from "../layouts/Base.astro";
 import MirrorBrowser from "../components/MirrorBrowser.astro";
 ---
 
-<Base title="Browse — N9 Mirror" active="browse">
-  <section class="mx-auto max-w-screen-xl px-6 py-12 md:px-10 lg:px-16">
-    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
-      Browse the mirror
+<Base title="Browse — N9 Archive">
+  <section class="mx-auto max-w-screen-xl px-6 pt-16 pb-8 md:px-10 lg:px-16">
+    <p class="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Raw file listing
+    </p>
+    <h1 class="font-serif text-3xl font-normal text-white md:text-4xl" style="font-variation-settings: 'opsz' 36;">
+      Everything in the bucket.
     </h1>
-    <p class="mt-4 max-w-2xl text-lg text-n9-300">
-      Live listing of everything in the bucket. Click into folders, filter by
-      name, click a file to download it.
+    <p class="mt-4 max-w-2xl text-sm text-n9-300">
+      Click into folders, filter by name. Click a
+      <code class="rounded bg-n9-800 px-1.5 py-0.5 text-xs">.deb</code> to see
+      its install command, or grab any other file directly. Most people want
+      the <a href="/packages" class="archive-link">package catalog</a> instead — it's
+      searchable and has descriptions.
     </p>
   </section>
 
   <section class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16">
     <MirrorBrowser
-      rootPrefix="/"
-      rootLabel="Packages"
+      rootPrefix=""
+      rootLabel="Everything"
     />
   </section>
 </Base>

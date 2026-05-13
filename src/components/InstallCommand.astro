@@ -1,0 +1,58 @@
+---
+/**
+ * InstallCommand — copyable `apt-get install <name>` block.
+ *
+ * Used on the package detail page and (eventually) inside the install modal.
+ * Self-contained Alpine component; safe to drop in anywhere.
+ */
+interface Props {
+  packageName: string;
+  /** Visual size — "lg" makes a bigger headline block, "sm" stays compact. */
+  size?: "sm" | "lg";
+}
+
+const { packageName, size = "sm" } = Astro.props;
+
+const command = `apt-get install ${packageName}`;
+const codeSize = size === "lg" ? "text-base py-3" : "text-sm py-2.5";
+---
+
+<div
+  x-data={`installCommand(${JSON.stringify({ command })})`}
+  class="flex items-stretch gap-2"
+>
+  <code
+    class:list={[
+      "flex-1 overflow-x-auto rounded-md bg-n9-950 px-3 font-mono text-n9-100",
+      codeSize,
+    ]}
+  >
+    {command}
+  </code>
+  <button
+    @click="copy()"
+    type="button"
+    class="shrink-0 rounded-md border border-n9-700 bg-n9-800 px-3 text-xs font-medium text-n9-100 hover:border-n9-500"
+    x-text="copied ? 'Copied' : 'Copy'"
+  >
+    Copy
+  </button>
+</div>
+
+<script is:inline>
+  window.installCommand = function (config) {
+    return {
+      command: config.command,
+      copied: false,
+      async copy() {
+        try {
+          await navigator.clipboard.writeText(this.command);
+          this.copied = true;
+          setTimeout(() => { this.copied = false; }, 1500);
+        } catch {
+          /* Clipboard API may be blocked on http://; ignore. */
+        }
+      },
+    };
+  };
+</script>

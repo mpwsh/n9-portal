@@ -7,8 +7,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "wrangler dev",
-    "deploy": "astro build && wrangler deploy",
-    "build-deb": "bash scripts/build-deb.sh"
+    "deploy": "bun run sync-packages && astro build && wrangler deploy",
+    "build-deb": "bash scripts/build-deb.sh",
+    "sync-packages": "bun run scripts/sync-packages.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.0",

@@ -1,8 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
 
-// import.meta.glob returns a record of path -> module-loader; eager: true
-// makes it return the modules directly so we can read frontmatter sync.
 const modules = import.meta.glob<{
   frontmatter: { title: string; description?: string };
   url: string;
@@ -17,30 +15,45 @@ const sorted = Object.values(modules)
   .sort((a, b) => a.title.localeCompare(b.title));
 ---
 
-<Base title="Guides — N9 Mirror" active="guides">
-  <section class="mx-auto max-w-screen-xl px-6 py-12 md:px-10 lg:px-16">
-    <h1 class="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+<Base title="Guides — N9 Archive" active="guides">
+  <article class="mx-auto max-w-3xl px-6 pt-16 pb-10 md:px-10 md:pt-20">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
       Guides
-    </h1>
-    <p class="mt-4 max-w-2xl text-lg text-n9-300">
-      Step-by-step tutorials for getting the most out of your N9.
     </p>
-  </section>
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
+      The small fixes that come up at fifteen.
+    </h1>
+    <p
+      class="mt-6 max-w-[36rem] font-serif text-[1.0625rem] leading-[1.7] text-n9-300 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      Notes for the things that don't quite work out of the box: enabling
+      developer mode, flashing a brick back to life, the aegis hack,
+      troubleshooting the flasher. Written down so the next person doesn't
+      have to figure it out twice.
+    </p>
+  </article>
 
-  <section class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16">
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <section class="mx-auto max-w-3xl px-6 pb-24 md:px-10 md:pb-32">
+    <ol class="border-t border-n9-800/60">
       {sorted.map((g) => (
-        <a
-          href={g.url}
-          class="group block rounded-lg border border-n9-700 bg-n9-800 p-6 transition hover:border-n9-500"
-        >
-          <h2 class="mb-2 text-lg font-semibold text-white">{g.title}</h2>
-          <p class="mb-4 text-sm text-n9-300">{g.description}</p>
-          <p class="text-sm font-medium text-n9-200 group-hover:text-white">
-            Read →
-          </p>
-        </a>
+        <li class="border-b border-n9-800/60">
+          <a
+            href={g.url}
+            class="group flex flex-col gap-1 py-5 transition-colors"
+          >
+            <h2 class="font-serif text-xl text-white group-hover:text-[var(--color-accent)] transition-colors" style="font-variation-settings: 'opsz' 22;">
+              {g.title}
+            </h2>
+            <p class="text-sm leading-relaxed text-n9-300 md:text-[0.9375rem]">
+              {g.description}
+            </p>
+          </a>
+        </li>
       ))}
-    </div>
+    </ol>
   </section>
 </Base>

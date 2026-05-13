@@ -1,0 +1,117 @@
+---
+import Base from "../layouts/Base.astro";
+import MirrorBrowser from "../components/MirrorBrowser.astro";
+
+/**
+ * Featured items on /design are pointers, not download buttons.
+ *
+ * Each card scrolls down to the embedded browser and opens it at the right
+ * subdirectory (or shows the relevant files in the current view). We can't
+ * link directly to e.g. a zipped font family because the files are stored
+ * as-is — three loose .ttf files and a folder for the creation kit.
+ *
+ * `targetPath` is the path the browser should navigate to. It must start
+ * with the rootPrefix ("design/") or the listener will refuse it.
+ */
+const featured = [
+  {
+    title: "Nokia Pure Text",
+    sub: "The system typeface",
+    note: "Three weights — Light, Regular, Bold — plus Nokia's own release notes. The face every menu was set in.",
+    targetPath: "design/",
+    cta: "Show in browser",
+  },
+  {
+    title: "CoreUI Toolkit",
+    sub: "Harmattan UI assets, v1.6",
+    note: "Nokia's developer-facing UI kit: buttons, indicators, the lot. Distributed as the original .zip.",
+    targetPath: "design/",
+    cta: "Show in browser",
+  },
+  {
+    title: "Launcher Icon Creation Kit",
+    sub: "2011 MeeGo launcher kit",
+    note: "PDF guidelines plus Photoshop templates Nokia shipped to developers for icons that fit the OS.",
+    targetPath: "design/2011_MEEGO_LAUNCHER_ICON_CREATION_KIT_CS3/",
+    cta: "Open the kit folder",
+  },
+];
+---
+
+<Base title="Design — N9 Archive" active="design">
+  <article class="mx-auto max-w-screen-xl px-6 pt-16 pb-10 md:px-10 md:pt-20 lg:px-16">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Design archive
+    </p>
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
+      The materials Nokia handed designers.
+    </h1>
+    <div
+      class="mt-8 max-w-[40rem] space-y-5 font-serif text-[1.0625rem] leading-[1.7] text-n9-200 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      <p>
+        Harmattan had a strong house style: Nokia Pure as the system face, a
+        documented UI toolkit, and a launcher icon spec with templates. All
+        of it shipped to third-party developers in 2011 to help apps fit the
+        OS. None of it is on Nokia's servers anymore. It is on this one.
+      </p>
+    </div>
+  </article>
+
+  {/* Featured items — pointers into the browser, not downloads. */}
+  <section class="mx-auto max-w-screen-xl px-6 py-6 md:px-10 lg:px-16">
+    <div class="grid gap-4 md:grid-cols-3">
+      {featured.map((item) => (
+        <button
+          type="button"
+          data-target-path={item.targetPath}
+          class="featured-card group flex flex-col gap-3 rounded-lg border border-n9-700 bg-n9-900/40 p-5 text-left transition hover:border-n9-500"
+        >
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-n9-500">
+              {item.sub}
+            </p>
+            <h2 class="mt-1.5 font-serif text-xl text-white" style="font-variation-settings: 'opsz' 24;">
+              {item.title}
+            </h2>
+          </div>
+          <p class="flex-1 text-sm leading-relaxed text-n9-300">
+            {item.note}
+          </p>
+          <p class="text-xs font-medium text-n9-200 group-hover:text-white">
+            {item.cta} ↓
+          </p>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-screen-xl px-6 pt-8 pb-20 md:px-10 lg:px-16" id="design-browser">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Browse everything
+    </p>
+    <MirrorBrowser rootPrefix="design/" />
+  </section>
+</Base>
+
+<script is:inline>
+  // Wire featured cards → MirrorBrowser via the cross-component custom
+  // event. Plain DOM; no Alpine namespace dependency.
+  document.addEventListener("click", (ev) => {
+    const card = ev.target.closest(".featured-card");
+    if (!card) return;
+    const path = card.dataset.targetPath;
+    if (!path) return;
+    window.dispatchEvent(
+      new CustomEvent("mirror-browser-go", { detail: { path } })
+    );
+    const browser = document.getElementById("design-browser");
+    if (browser) {
+      browser.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+</script>

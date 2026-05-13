@@ -89,4 +89,4 @@ This works on closed-mode devices — no kernel reflash, no Open Mode required.
 
 ---
 
-**Next:** [browse the mirror](/browse) for community apps, or check out the other [guides](/guides/).
+**Next:** [browse the package catalog](/packages) for community apps, or check out the other [guides](/guides/).

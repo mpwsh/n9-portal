@@ -25,7 +25,7 @@ Wi-Fi or 3G, doesn't matter — just make sure you're online.
 Open the browser on your N9 and go to:
 
 ```
-http://n9.mpw.sh/setup.deb
+n9.mpw.sh/setup.deb
 ```
 
 Tap the file when it downloads, accept the prompts, and let it install. This adds the N9 mirror to your apt sources so Developer Mode can find the packages it needs.
@@ -66,4 +66,29 @@ You can also install "Utilities" from Security -> Developer mode -> Press instal
 
 ---
 
-**Next:** Browse the [mirror](/browse) to find packages, or check out the other [guides](/guides/).
+## Alternative: configure the mirror by hand
+
+If the `.deb` from Step 3 fails — corrupt download, browser refuses to open it, or you'd rather see what it does — you can wire the sources up yourself. After you've finished Step 6 (root access in terminal), drop a file at `/etc/apt/sources.list.d/n9-mirror.list` with:
+
+```
+# Flat repositories
+deb http://n9.mpw.sh/n9mirror/001 ./
+deb http://n9.mpw.sh/n9mirror/apps ./
+deb http://n9.mpw.sh/n9mirror/tools ./
+
+# OpenRepos mirror
+deb http://n9.mpw.sh/openrepos ./
+
+# Standard repository (Harmattan SDK)
+deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
+deb-src http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
+
+# Nokia binaries
+deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries
+```
+
+Then `apt-get update`. Same result as the `.deb`.
+
+---
+
+**Next:** Browse the [package catalog](/packages) to find apps, or check out the other [guides](/guides/).

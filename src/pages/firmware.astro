@@ -1,0 +1,40 @@
+---
+import Base from "../layouts/Base.astro";
+import MirrorBrowser from "../components/MirrorBrowser.astro";
+---
+
+<Base title="Firmware — N9 Archive" active="firmware">
+  <article class="mx-auto max-w-screen-xl px-6 pt-16 pb-10 md:px-10 md:pt-20 lg:px-16">
+    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
+      Firmware images
+    </p>
+    <h1
+      class="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-white md:text-5xl"
+      style="font-variation-settings: 'opsz' 48;"
+    >
+      The files that bring it back.
+    </h1>
+    <div
+      class="mt-8 max-w-[40rem] space-y-5 font-serif text-[1.0625rem] leading-[1.7] text-n9-200 md:text-[1.125rem]"
+      style="font-variation-settings: 'opsz' 16;"
+    >
+      <p>
+        These are the original Nokia firmware images for the RM-696 — the
+        files a flasher writes onto the device when something has gone wrong
+        or when you're starting fresh. <code class="rounded bg-n9-800/70 px-1.5 py-0.5 font-mono text-[0.92em] text-n9-100">PR_LEGACY</code>
+        is the main firmware payload; the <code class="rounded bg-n9-800/70 px-1.5 py-0.5 font-mono text-[0.92em] text-n9-100">EMMC</code>
+        image is the user-data partition, region-specific.
+      </p>
+      <p>
+        The <a href="/guides/flashing" class="archive-link">flashing guide</a>
+        walks through the actual procedure end-to-end, and the
+        <a href="/guides/flasher-troubleshooting" class="archive-link">troubleshooting
+        notes</a> cover the parts that tend to go wrong.
+      </p>
+    </div>
+  </article>
+
+  <section class="mx-auto max-w-screen-xl px-6 pb-20 md:px-10 lg:px-16">
+    <MirrorBrowser rootPrefix="images/" />
+  </section>
+</Base>
