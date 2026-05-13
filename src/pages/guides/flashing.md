@@ -20,7 +20,7 @@ Then install flasher itself:
 sudo dpkg -i ./flasher_3.12.1_amd64.deb
 ```
 
-You can download the package here: [flasher_3.12.1_amd64.deb](https://n9.mpw.sh/downloads/flasher_3.12.1_amd64.deb).
+You can download the package here: [flasher_3.12.1_amd64.deb](https://n9.mpw.sh/tools/flasher_3.12.1_amd64.deb).
 
 ## Step 2: Connect the device
 
