@@ -35,6 +35,12 @@ jobs:
         # dpkg-deb is preinstalled on ubuntu-latest runners
         run: bash scripts/build-deb.sh
 
+      - name: Sync package metadata from mirror
+        # Fetches each repo's Packages.gz, parses, writes src/data/packages.json
+        # and public/search-index.json. Must run before astro build so the
+        # /packages routes have data to render.
+        run: bun run sync-packages
+
       - name: Build Astro site
         run: bun run build
 
