@@ -53,42 +53,25 @@ devel-su
 # password is rootme
 ```
 
-## Step 7: Install wget
+## Step 7: Set a good password for user
 
 As root, run:
 
 ```bash
-apt-get update
-apt-get install wget -y
+passwd user
 ```
 
-You can also install "Utilities" from Security -> Developer mode -> Press install on utilities
+output:
+
+```bash
+Changing password for user
+Enter the new password (minimum of 5, maximum of 8 characters)
+Please use a combination of upper and lower case letters and numbers.
+New password:
+Re-enter new password:
+Password changed.
+```
 
 ---
 
-## Alternative: configure the mirror by hand
-
-If the `.deb` from Step 3 fails — corrupt download, browser refuses to open it, or you'd rather see what it does — you can wire the sources up yourself. After you've finished Step 6 (root access in terminal), drop a file at `/etc/apt/sources.list.d/n9-mirror.list` with:
-
-```
-# Flat repositories
-deb http://n9.mpw.sh/n9mirror/001 ./
-deb http://n9.mpw.sh/n9mirror/apps ./
-deb http://n9.mpw.sh/n9mirror/tools ./
-
-# OpenRepos mirror
-deb http://n9.mpw.sh/openrepos ./
-
-# Standard repository (Harmattan SDK)
-deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
-deb-src http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
-
-# Nokia binaries
-deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries
-```
-
-Then `apt-get update`. Same result as the `.deb`.
-
----
-
-**Next:** Browse the [package catalog](/packages) to find apps, or check out the other [guides](/guides/).
+**Next:** continue with [Install Aegis Hack](/guides/install-aegis-hack/) (required), before stalling apps from the [package catalog](/packages).

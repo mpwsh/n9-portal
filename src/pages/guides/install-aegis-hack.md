@@ -4,7 +4,7 @@ title: Install Aegis Hack
 description: Unlock OpenRepos packages that require system-level permissions.
 ---
 
-> ℹ️ Prerequisite: you've installed the [N9 mirror](/setup) and [enabled Developer Mode](/guides/developer-mode).
+> ℹ️ Prerequisite: [enabled Developer Mode](/guides/developer-mode).
 
 ## What this is
 
@@ -71,15 +71,12 @@ The patched `aegis-install` stays in place. This is just cleanup.
 
 ## You're done
 
-From now on, plain `apt-get install` works for any OpenRepos package, with full system permissions:
+From now on, plain `apt-get install` works for any OpenRepos package.
+Lets try installing `reboot` so you take care of that lock button.
 
 ```bash
 apt-get install reboot
-apt-get install filecase
-apt-get install fingerterm
 ```
-
-Open the **Reboot** app from your launcher to confirm — tapping it actually reboots the device. (Without Aegis Installer, the app installs but can't trigger the reboot.)
 
 ## How this works
 

@@ -4,69 +4,10 @@ Static portal for the MeeGo Harmattan mirror at [**n9.mpw.sh**](https://n9.mpw.s
 
 ## How it works
 
-```
-                ┌─────────────────────────────────────┐
-   request ──▶  │ Cloudflare Workers runtime           │
-                │                                       │
-                │  ┌─────────────┐    ┌──────────────┐ │
-                │  │ ASSETS      │    │ worker.js    │ │
-                │  │ (Astro dist)│    │              │ │
-                │  └─────────────┘    └──────────────┘ │
-                │       ▲                  ▲           │
-                │   / /setup /browse   /api/list,      │
-                │   /guides/...        raw R2 paths    │
-                └──────────────────────────┼───────────┘
-                                           │
-                                           ▼
-                                    R2 bucket "meego"
-```
-
 The Workers runtime serves the static site directly. Only requests that don't match a built file fall through to `worker.js`, which then either:
 
 - Returns a JSON listing of the R2 bucket (`/api/list?prefix=…`), used by `/browse`
 - Streams a raw R2 object (everything else — `.deb` files, `Release`, `Packages.gz`, etc.)
-
-## Project layout
-
-```
-.
-├── astro.config.mjs           Astro config (static output + Tailwind v4)
-├── wrangler.toml              Workers config (ASSETS + R2 bindings)
-├── worker.js                  /api/list and R2 fallthrough
-├── package.json
-├── src/
-│   ├── layouts/
-│   │   ├── Base.astro         Shared header/footer
-│   │   └── GuideLayout.astro  Wraps markdown guide pages
-│   ├── components/
-│   │   ├── MirrorBrowser.astro    Alpine-powered file browser (with install modal)
-│   │   ├── InstallCommand.astro   Copyable apt-get install block
-│   │   └── PackageIcon.astro      Inline base64 icon w/ SVG fallback
-│   ├── lib/
-│   │   └── packages.ts        Typed catalog loader + helpers
-│   ├── data/
-│   │   └── packages.json      Generated catalog (sync-packages)
-│   ├── pages/
-│   │   ├── index.astro        Landing
-│   │   ├── browse.astro       Raw bucket file browser
-│   │   ├── firmware.astro     Firmware images (scoped browser over images/)
-│   │   ├── developers.astro   Developers lobby (cards link to /developers/docs, /developers/ux, .zip downloads)
-│   │   ├── manuals.astro      Service manual & schematics (scoped browser over manuals/)
-│   │   ├── packages/
-│   │   │   ├── index.astro    Searchable package catalog
-│   │   │   └── [name].astro   Per-package detail page (getStaticPaths)
-│   │   └── guides/
-│   │       ├── index.astro    Guides listing
-│   │       └── *.md           Each guide (developer-mode includes mirror setup)
-│   └── styles/global.css      Tailwind + custom theme
-├── public/                    Static assets (favicon etc.)
-│   ├── setup.deb             Built by scripts/build-deb.sh (gitignored)
-│   └── search-index.json      Slim client-side search manifest (gitignored)
-├── scripts/
-│   ├── build-deb.sh           Generates the .deb
-│   └── sync-packages.ts       Fetches & parses Packages.gz from all 5 repos
-└── .github/workflows/deploy.yml  CI: build .deb + sync + Astro + wrangler deploy
-```
 
 ## Local development
 
@@ -91,10 +32,10 @@ bun run preview       # = wrangler dev — runs Worker against real R2
 
 Push to `main` and the GitHub Actions workflow handles it. You need two repository secrets:
 
-| Secret name             | Where to get it                                                                                |
-| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Secret name             | Where to get it                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
 | `CLOUDFLARE_API_TOKEN`  | Cloudflare dashboard → My Profile → API Tokens → Create Token → "Edit Cloudflare Workers" template |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard, right sidebar on any zone overview page                                  |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard, right sidebar on any zone overview page                                      |
 
 Add them under repo Settings → Secrets and variables → Actions → New repository secret.
 
@@ -109,6 +50,7 @@ bun run deploy
 
 1. Create a new `.md` file in `src/pages/guides/`
 2. Use this frontmatter:
+
    ```yaml
    ---
    layout: ../../layouts/GuideLayout.astro
@@ -116,6 +58,7 @@ bun run deploy
    description: One-liner shown in the guide list and meta tags.
    ---
    ```
+
 3. Write markdown. The guides index page picks it up automatically via `Astro.glob`.
 
 ## Updating the mirror URL or sources
