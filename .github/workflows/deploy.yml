@@ -35,6 +35,16 @@ jobs:
         # dpkg-deb is preinstalled on ubuntu-latest runners
         run: bash scripts/build-deb.sh
 
+      - name: Publish .deb to R2 apt repo
+        # Reads public/setup.deb, lists existing .debs in the R2 repo path,
+        # regenerates Packages.gz, uploads the new versioned .deb and the
+        # new index. Pure Bun — no mc, no dpkg-dev needed on the runner.
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+        run: bun run publish
+
       - name: Sync package metadata from mirror
         # Fetches each repo's Packages.gz, parses, writes src/data/packages.json
         # and public/search-index.json. Must run before astro build so the

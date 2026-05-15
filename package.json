@@ -9,6 +9,7 @@
     "preview": "wrangler dev",
     "deploy": "bun run sync-packages && astro build && wrangler deploy",
     "build-deb": "bash scripts/build-deb.sh",
+    "publish": "bun run scripts/publish-repo.ts",
     "sync-packages": "bun run scripts/sync-packages.ts"
   },
   "dependencies": {

@@ -17,7 +17,7 @@ set -euo pipefail
 
 PKG_NAME="n9-mirror-setup"
 SHORT_PKG_NAME="setup"
-PKG_VERSION="1.0-2"
+PKG_VERSION="1.0-3"
 MAINTAINER="N9 Mirror <admin@mpw.sh>"
 HOMEPAGE="https://n9.mpw.sh"
 DISPLAY_NAME="N9 Mirror Setup"
@@ -41,6 +41,9 @@ mkdir -p "$PKG_DIR/etc/apt/sources.list.d"
 # (modern TLS only works after installing the OpenSSL 1.0.2u package).
 cat >"$PKG_DIR/etc/apt/sources.list.d/n9-mirror.list" <<'EOF'
 # N9 Mirror — n9.mpw.sh
+
+# Our own packages (this is what makes setup itself updatable)
+deb [trusted=yes] http://n9.mpw.sh/repo ./
 
 # Flat repositories
 deb http://n9.mpw.sh/n9mirror/001 ./
