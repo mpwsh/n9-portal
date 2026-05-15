@@ -1,28 +1,28 @@
 ---
 import Base from "../layouts/Base.astro";
-import MirrorBrowser from "../components/MirrorBrowser.astro";
 
 /**
- * Featured manuals. Pointers into the browser — clicking scrolls and
- * each card fires a `mirror-browser-go` event with a target path.
- *
- * Filenames here are placeholders that match the working directory listing.
- * If they change, only the `targetPath` strings need updating.
+ * Three featured manuals — each card opens the PDF in a new tab.
+ * Add more entries here as files land in n9.mpw.sh/manuals/.
  */
 const featured = [
+  {
+    title: "User manual",
+    sub: "N9 · End-user guide",
+    note: "The full end-user manual Nokia shipped with the device. Settings, gestures, app behavior, the official tour of what the phone could do.",
+    href: "/manuals/Nokia-N9-User-manual-no-00.pdf",
+  },
   {
     title: "Service manual",
     sub: "RM-696 · L1 / L2",
     note: "Board layouts, the disassembly procedure, parts list and torque specs. The reference Nokia care points used when one came in for service.",
-    targetPath: "manuals/",
-    cta: "Show in browser",
+    href: "/manuals/Nokia_N9_RM-696_Service_Manual_L1L2_v3.0.pdf",
   },
   {
     title: "Schematics",
     sub: "RM-696 hardware",
     note: "Circuit diagrams for the mainboard. Useful for repair work that goes past component swap — tracing power rails, finding test points.",
-    targetPath: "manuals/",
-    cta: "Show in browser",
+    href: "/manuals/Nokia_N9_RM-696_Full_schematics_v1.0.pdf",
   },
 ];
 ---
@@ -54,14 +54,14 @@ const featured = [
     </div>
   </article>
 
-  {/* Featured items — pointers into the browser, not downloads. */}
-  <section class="mx-auto max-w-screen-xl px-6 py-6 md:px-10 lg:px-16">
-    <div class="grid gap-4 md:grid-cols-2">
+  <section class="mx-auto max-w-screen-xl px-6 py-6 pb-20 md:px-10 lg:px-16">
+    <div class="grid gap-4 md:grid-cols-3">
       {featured.map((item) => (
-        <button
-          type="button"
-          data-target-path={item.targetPath}
-          class="featured-card group flex flex-col gap-3 rounded-lg border border-n9-700 bg-n9-900/40 p-5 text-left transition hover:border-n9-500"
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener"
+          class="group flex flex-col gap-3 rounded-lg border border-n9-700 bg-n9-900/40 p-5 text-left transition hover:border-n9-500"
         >
           <div>
             <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-n9-500">
@@ -75,35 +75,10 @@ const featured = [
             {item.note}
           </p>
           <p class="text-xs font-medium text-n9-200 group-hover:text-white">
-            {item.cta} ↓
+            Open PDF ↗
           </p>
-        </button>
+        </a>
       ))}
     </div>
   </section>
-
-  <section class="mx-auto max-w-screen-xl px-6 pt-8 pb-20 md:px-10 lg:px-16" id="manuals-browser">
-    <p class="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-n9-500">
-      Browse everything
-    </p>
-    <MirrorBrowser rootPrefix="manuals/" />
-  </section>
 </Base>
-
-<script is:inline>
-  // Cross-component bridge — fires a custom event the
-  // MirrorBrowser listens for.
-  document.addEventListener("click", (ev) => {
-    const card = ev.target.closest(".featured-card");
-    if (!card) return;
-    const path = card.dataset.targetPath;
-    if (!path) return;
-    window.dispatchEvent(
-      new CustomEvent("mirror-browser-go", { detail: { path } })
-    );
-    const browser = document.getElementById("manuals-browser");
-    if (browser) {
-      browser.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  });
-</script>

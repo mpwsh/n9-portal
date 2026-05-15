@@ -6,7 +6,8 @@ name: Publish .deb to apt repo
 #
 # Each app repo's release workflow calls this one. The contract is just:
 # "here's a .deb URL, please publish it." This workflow knows nothing about
-# the app — it downloads, validates, publishes.
+# the app — it downloads, validates, publishes, then triggers a site
+# rebuild so the packages catalog reflects the new entry.
 
 on:
   workflow_dispatch:
@@ -38,6 +39,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
+      actions: write # to dispatch deploy.yml after upload
       contents: read
 
     steps:
@@ -58,3 +60,16 @@ jobs:
           R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
           R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
         run: bun run scripts/publish-repo.ts "${{ inputs.deb_url }}"
+
+      - name: Trigger site redeploy
+        # Same-repo dispatch, so the workflow's own GITHUB_TOKEN is sufficient.
+        # rebuild_deb=false tells deploy.yml to skip rebuilding setup.deb —
+        # setup didn't change, and the app's .deb we just uploaded is
+        # already in R2.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy.yml \
+            --repo "${{ github.repository }}" \
+            --ref main \
+            --field rebuild_deb=false

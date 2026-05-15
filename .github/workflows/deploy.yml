@@ -3,8 +3,18 @@ name: Deploy
 on:
   push:
     branches: [main]
-  # Allow manual runs from the Actions tab
+
+  # Manual runs from the Actions tab, and also re-triggered by publish.yml
+  # after a successful .deb upload (so the site catalog refreshes).
+  # publish.yml passes rebuild_deb=false since setup.deb hasn't changed and
+  # the new app .deb is already in R2.
   workflow_dispatch:
+    inputs:
+      rebuild_deb:
+        description: "Rebuild and re-publish setup.deb"
+        required: false
+        type: boolean
+        default: true
 
 # Avoid double-deploys if two pushes land close together — cancel the
 # in-flight one and only ship the newest.
@@ -19,9 +29,26 @@ jobs:
     permissions:
       contents: read
       deployments: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # paths-filter needs at least 2 commits to diff against.
+          fetch-depth: 2
+
+      - name: Detect .deb-relevant changes
+        # Only meaningful on push events; on workflow_dispatch the inputs
+        # control it. Output is "false" for workflow_dispatch.
+        id: changes
+        if: github.event_name == 'push'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            deb:
+              - 'scripts/build-deb.sh'
+              - 'scripts/publish-repo.ts'
+              - 'scripts/icon.png'
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -32,13 +59,21 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build .deb package
-        # dpkg-deb is preinstalled on ubuntu-latest runners
+        # Three triggers:
+        #   1. push that touched .deb-relevant files
+        #   2. workflow_dispatch with rebuild_deb=true (default for UI runs)
+        #
+        # publish.yml triggers us with rebuild_deb=false; this step is skipped
+        # because setup.deb didn't change and the app's .deb is already in R2.
+        if: |
+          (github.event_name == 'push' && steps.changes.outputs.deb == 'true') ||
+          (github.event_name == 'workflow_dispatch' && inputs.rebuild_deb)
         run: bash scripts/build-deb.sh
 
       - name: Publish .deb to R2 apt repo
-        # Reads public/setup.deb, lists existing .debs in the R2 repo path,
-        # regenerates Packages.gz, uploads the new versioned .deb and the
-        # new index. Pure Bun — no mc, no dpkg-dev needed on the runner.
+        if: |
+          (github.event_name == 'push' && steps.changes.outputs.deb == 'true') ||
+          (github.event_name == 'workflow_dispatch' && inputs.rebuild_deb)
         env:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
@@ -46,9 +81,8 @@ jobs:
         run: bun run publish
 
       - name: Sync package metadata from mirror
-        # Fetches each repo's Packages.gz, parses, writes src/data/packages.json
-        # and public/search-index.json. Must run before astro build so the
-        # /packages routes have data to render.
+        # Always runs — picks up new packages published by other app repos
+        # (via publish.yml), even when setup.deb didn't change.
         run: bun run sync-packages
 
       - name: Build Astro site
@@ -59,7 +93,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # The action's default is `deploy`, which is what we want.
-          # `bun install` already happened above, so disable the action's own
-          # install step to avoid duplicating it with npm.
           packageManager: bun

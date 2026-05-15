@@ -24,6 +24,12 @@ interface RepoConfig {
 
 const REPOS: RepoConfig[] = [
   {
+    id: "mpw",
+    label: "mpw",
+    url: "http://n9.mpw.sh/repo/Packages.gz",
+    filePrefix: "http://n9.mpw.sh/repo/",
+  },
+  {
     id: "apt-repo",
     label: "Community repo",
     url: "http://n9.mpw.sh/apt-repo/dists/unstable/main/binary-armel/Packages.gz",
@@ -64,15 +70,15 @@ export interface ParsedPackage {
   repoId: string;
   repoLabel: string;
   // Download
-  filename: string;        // path within the repo, from Packages.gz "Filename:"
-  downloadUrl: string;     // absolute, built from filePrefix + filename
+  filename: string; // path within the repo, from Packages.gz "Filename:"
+  downloadUrl: string; // absolute, built from filePrefix + filename
   size: number;
   md5sum?: string;
   sha1?: string;
   sha256?: string;
   // Metadata
   maintainer?: string;
-  description?: string;    // raw, with newlines preserved
+  description?: string; // raw, with newlines preserved
   descriptionShort: string; // first line, never empty (falls back to "(no description)")
   section?: string;
   homepage?: string;
@@ -82,7 +88,7 @@ export interface ParsedPackage {
   conflicts?: string;
   provides?: string;
   // Visual
-  icon?: string;           // base64 PNG, no data: prefix
+  icon?: string; // base64 PNG, no data: prefix
 }
 
 /**
