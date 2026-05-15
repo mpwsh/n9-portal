@@ -27,8 +27,8 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import { readFile } from "node:fs/promises";
 import { S3Client } from "bun";
 
-const BUCKET = "meego";
-const REPO_PATH = "repo";
+const BUCKET = "n9";
+const REPO_PATH = "meego/repo";
 const LOCAL_DEB = "public/setup.deb";
 
 // ---------- env ----------
@@ -312,26 +312,78 @@ async function uploadObject(
   await file.write(data, { type: contentType });
 }
 
-// ---------- main ----------
+// ---------- input handling ----------
 
-async function main() {
-  // 1. Inspect the freshly built .deb.
-  const localBytes = await readFile(LOCAL_DEB);
-  const localBuf = new Uint8Array(localBytes);
-  const control = await readControlFields(LOCAL_DEB);
+/**
+ * Resolve the input source — either a local path or a URL — to in-memory bytes.
+ * URL inputs are downloaded with a single GET; redirects (e.g. github.com →
+ * objects.githubusercontent.com for release assets) are followed by fetch().
+ */
+async function loadInputDeb(source: string): Promise<Uint8Array> {
+  if (source.startsWith("http://") || source.startsWith("https://")) {
+    console.log(`==> Downloading ${source}`);
+    const res = await fetch(source, { redirect: "follow" });
+    if (!res.ok) {
+      throw new Error(`fetch ${source}: HTTP ${res.status} ${res.statusText}`);
+    }
+    return new Uint8Array(await res.arrayBuffer());
+  }
+  console.log(`==> Reading ${source}`);
+  return new Uint8Array(await readFile(source));
+}
+
+/**
+ * Basic sanity: it really is a .deb, parseable, with the three fields the
+ * Packages index requires. We don't enforce arch or package-name policies —
+ * just "this is structurally a Debian package."
+ */
+function validateDeb(
+  bytes: Uint8Array,
+  label: string,
+): {
+  control: Record<string, string>;
+  pkgName: string;
+  version: string;
+  arch: string;
+} {
+  let control: Record<string, string>;
+  try {
+    control = readControlFieldsFromBytes(bytes, label);
+  } catch (err) {
+    throw new Error(`${label}: not a valid .deb (${(err as Error).message})`);
+  }
 
   const pkgName = control["Package"];
   const version = control["Version"];
   const arch = control["Architecture"];
-  if (!pkgName || !version || !arch) {
+  const missing = [
+    !pkgName && "Package",
+    !version && "Version",
+    !arch && "Architecture",
+  ].filter(Boolean);
+  if (missing.length > 0) {
     throw new Error(
-      `${LOCAL_DEB}: missing Package/Version/Architecture in control file`,
+      `${label}: control file missing required fields: ${missing.join(", ")}`,
     );
   }
 
+  return { control, pkgName: pkgName!, version: version!, arch: arch! };
+}
+
+// ---------- main ----------
+
+async function main() {
+  // Accept the .deb source as argv[2], defaulting to public/setup.deb so the
+  // existing site-build flow keeps working without changes.
+  const source = process.argv[2] || LOCAL_DEB;
+
+  // 1. Load + validate the input .deb.
+  const localBuf = await loadInputDeb(source);
+  const { control, pkgName, version, arch } = validateDeb(localBuf, source);
+
   const versionedName = `${pkgName}_${version}_${arch}.deb`;
   const versionedKey = `${REPO_PATH}/${versionedName}`;
-  console.log(`==> Built: ${pkgName} ${version} (${arch})`);
+  console.log(`==> Package: ${pkgName} ${version} (${arch})`);
   console.log(`==> Publishing as: ${versionedName}`);
 
   // 2. List existing .debs in the repo.
