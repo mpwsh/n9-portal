@@ -27,8 +27,8 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import { readFile } from "node:fs/promises";
 import { S3Client } from "bun";
 
-const BUCKET = "n9";
-const REPO_PATH = "meego/repo";
+const BUCKET = "meego";
+const REPO_PATH = "repo";
 const LOCAL_DEB = "public/setup.deb";
 
 // ---------- env ----------
