@@ -1,0 +1,60 @@
+name: Publish .deb to apt repo
+
+# Triggered by:
+#   - Other app repos via the workflow_dispatch API, sending the .deb URL.
+#   - Manually from the Actions tab for debugging / one-off publishes.
+#
+# Each app repo's release workflow calls this one. The contract is just:
+# "here's a .deb URL, please publish it." This workflow knows nothing about
+# the app — it downloads, validates, publishes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      deb_url:
+        description: "URL to the .deb file (e.g. a GitHub Release asset)"
+        required: true
+        type: string
+      app_name:
+        description: "App name (cosmetic — shows up in the run title)"
+        required: false
+        type: string
+        default: ""
+      version:
+        description: "Version (cosmetic)"
+        required: false
+        type: string
+        default: ""
+
+# Serialize publishes. Two concurrent runs would both regenerate Packages.gz
+# from the current R2 state and the second upload would clobber the first.
+concurrency:
+  group: publish-deb
+  cancel-in-progress: false
+
+run-name: ${{ inputs.app_name }} ${{ inputs.version }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Publish .deb to R2 apt repo
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+        run: bun run scripts/publish-repo.ts "${{ inputs.deb_url }}"
