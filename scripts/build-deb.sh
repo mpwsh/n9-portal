@@ -52,14 +52,14 @@ deb http://n9.mpw.sh/openrepos ./
 
 # Signed community apt-repo (hack-installer etc.) — opt in via
 # the Aegis Installer guide to also trust the signing key.
-# deb http://n9.mpw.sh/apt-repo unstable main
+deb http://n9.mpw.sh/apt-repo unstable main
 
 # Standard repository (Harmattan SDK)
-# deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
-# deb-src http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
+deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free non-free
+deb-src http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/sdk free
 
 # Nokia binaries
-# deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries
+deb http://n9.mpw.sh/harmattan-dev.nokia.com/ harmattan/41667a5bd857be02f487c2ce806fbf85 nokia-binaries
 EOF
 
 # Maemo-Icon-26 is base64 with each line indented by one space (debian
